@@ -2,9 +2,12 @@ const express = require('express');
 const pool = require('../config/db');
 const upload = require('../config/upload');
 const authenticateToken = require('../middleware/auth');
-const pdfParse = require('pdf-parse');
 const fs = require('fs').promises;
 const aiService = require('../services/aiService');
+
+// Using the simple require()
+// This works with version 1 of pdf-parse
+const pdfParse = require('pdf-parse');
 
 const router = express.Router();
 
@@ -18,19 +21,21 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const { originalname, filename, path: filepath } = req.file;
+    const { originalname, path: filepath } = req.file;
     let content = '';
 
-    // Extract text based on file type
     if (originalname.endsWith('.pdf')) {
       const dataBuffer = await fs.readFile(filepath);
-      const pdfData = await pdfParse(dataBuffer);
+      const pdfData = await pdfParse(dataBuffer); 
       content = pdfData.text;
     } else if (originalname.endsWith('.txt')) {
       content = await fs.readFile(filepath, 'utf-8');
     }
 
     if (!content || content.trim().length === 0) {
+      if (originalname.endsWith('.pdf')) {
+        return res.status(400).json({ error: 'Failed to extract text from PDF. Please ensure it contains readable text (not just images).' });
+      }
       return res.status(400).json({ error: 'Could not extract text from file' });
     }
 
@@ -50,6 +55,9 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     });
   } catch (error) {
     console.error('Upload error:', error);
+    if (error.message.includes('PDF')) {
+        return res.status(500).json({ error: 'A server error occurred while parsing the PDF.' });
+    }
     res.status(500).json({ error: 'Failed to upload document' });
   }
 });

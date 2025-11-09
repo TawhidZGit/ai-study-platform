@@ -1,188 +1,152 @@
-const { GoogleGenAI, Type } = require('@google/genai');
+// Loads environment variables from a .env file
+require('dotenv').config();
 
-const ai = new GoogleGenAI({});
-
-const MODEL_FALLBACK_ORDER = [
-    'gemini-2.5-flash',
-    'gemini-2.5-pro',
-    'gemini-2.5-flash-lite',
-];
-
-async function generateWithFallback(prompt, config, modelIndex = 0) {
-    if (modelIndex >= MODEL_FALLBACK_ORDER.length) {
-        throw new Error('All models exhausted. Rate limits reached on all available models.');
+// This is the JSON "blueprint" the model MUST follow.
+// It matches what your Summary.jsx component expects.
+const summarySchema = {
+  type: "OBJECT",
+  properties: {
+    tldr: { 
+      type: "STRING",
+      description: "A short, one-sentence summary (TL;DR)." 
+    },
+    keyPoints: {
+      type: "ARRAY",
+      items: { 
+        type: "STRING",
+        description: "A key point or takeaway from the document." 
+      },
+      description: "A list of 3-5 main key points."
+    },
+    detailedNotes: { 
+      type: "STRING",
+      description: "More detailed, in-depth notes from the document, formatted as a single string with newlines (\\n)." 
+    },
+    simpleExplanation: { 
+      type: "STRING",
+      description: "A simple, 'Explain Like I'm 5' (ELI5) version of the main topic." 
     }
+  },
+  // This ensures all fields are always returned
+  required: ["tldr", "keyPoints", "detailedNotes", "simpleExplanation"]
+};
 
-    const modelName = MODEL_FALLBACK_ORDER[modelIndex];
-    console.log(`Attempting generation with model: ${modelName}`);
-
-    try {
-        const result = await ai.models.generateContent({
-            model: modelName,
-            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            config: config,
-        });
-
-        if (result.json) {
-            return result.json;
-        }
-
-        throw new Error('Model did not return a structured JSON response.');
-
-    } catch (error) {
-        console.error(`Model ${modelName} failed:`, error.message);
-
-        if (error.message.includes('429') || error.message.includes('quota')) {
-            console.log(`Rate limit hit on ${modelName}, trying next model...`);
-            return generateWithFallback(prompt, config, modelIndex + 1);
-        }
-
-        throw error;
-    }
+// This is your prompt to the model.
+function createSummaryPrompt(documentContent) {
+  // We are no longer truncating. The full document content is passed.
+  return `
+    Please analyze the following document and generate a set of study notes in the required JSON format.
+    
+    Document Content:
+    ---
+    ${documentContent}
+    ---
+    
+    Respond ONLY with the JSON object.
+  `;
 }
 
-const schemas = {
-    summary: {
-        type: Type.OBJECT,
-        properties: {
-            tldr: { type: Type.STRING, description: "A 2-3 sentence maximum summary." },
-            keyPoints: { 
-                type: Type.ARRAY, 
-                description: "5 to 8 bullet points of main ideas.", 
-                items: { type: Type.STRING },
-                minItems: 5,
-                maxItems: 8
-            },
-            detailedNotes: { type: Type.STRING, description: "Comprehensive notes organized by topic/section." },
-            simpleExplanation: { type: Type.STRING, description: "An ELI5 explanation of the most complex concept." }
-        },
-        required: ['tldr', 'keyPoints', 'detailedNotes', 'simpleExplanation']
-    },
-    quiz: {
-        type: Type.OBJECT,
-        properties: {
-            questions: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        question: { type: Type.STRING },
-                        options: { 
-                            type: Type.ARRAY, 
-                            items: { type: Type.STRING },
-                            minItems: 4,
-                            maxItems: 4,
-                            description: "Exactly 4 multiple choice options (A, B, C, D)." 
-                        },
-                        correctAnswer: { 
-                            type: Type.INTEGER,
-                            minimum: 0,
-                            maximum: 3,
-                            description: "The index of the correct option (0 for A, 1 for B, 2 for C, 3 for D)." 
-                        },
-                        explanation: { type: Type.STRING, description: "A detailed explanation for the correct answer." }
-                    },
-                    required: ['question', 'options', 'correctAnswer', 'explanation']
-                }
-            }
-        },
-        required: ['questions']
-    },
-    flashcards: {
-        type: Type.OBJECT,
-        properties: {
-            cards: {
-                type: Type.ARRAY,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        front: { type: Type.STRING, description: "Key concept, term, or question (concise)." },
-                        back: { type: Type.STRING, description: "Definition, explanation, or answer (comprehensive but clear)." }
-                    },
-                    required: ['front', 'back']
-                }
-            }
-        },
-        required: ['cards']
+// Helper function to call the Gemini API
+async function callGeminiForSummary(documentContent, modelName) {
+  // We load the API key from your .env file
+  const apiKey = process.env.GEMINI_API_KEY || "";
+  if (!apiKey) {
+    console.error("GEMINI_API_KEY not found. Please set it in your .env file.");
+    throw new Error("API key is missing.");
+  }
+
+  // --- THIS IS THE FIX ---
+  // Corrected the typo in the API endpoint URL.
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  // --- END OF FIX ---
+
+  const prompt = createSummaryPrompt(documentContent);
+
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      // Force the model to return JSON
+      responseMimeType: "application/json",
+      responseSchema: summarySchema,
+      temperature: 0.5, // Good for consistent summary results
     }
-};
+  };
 
-const aiService = {
-    async generateSummary(documentContent) {
-        if (documentContent.length > 30000) {
-            console.warn(`Document truncated from ${documentContent.length} to 30000 chars`);
-        }
+  // --- API CALL AND PARSING ---
+  let retries = 3;
+  while (retries > 0) {
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-        const prompt = `You are an expert study assistant. Based on the following document, create comprehensive study notes that are well-organized and insightful.
-        
-Document content:
-${documentContent.substring(0, 30000)}`;
+      if (!response.ok) {
+        // Try to get more error details from the response body
+        const errorBody = await response.json().catch(() => ({})); // Use .catch in case body isn't valid JSON
+        console.error(`API Error Body (model: ${modelName}):`, errorBody);
+        throw new Error(`API call failed with status: ${response.status}. ${errorBody.error?.message || ''}`);
+      }
 
-        const config = {
-            responseMimeType: 'application/json',
-            responseSchema: schemas.summary,
-            temperature: 0.3, // Factual and deterministic
-        };
+      const result = await response.json();
+      
+      const candidate = result.candidates?.[0];
 
-        try {
-            return await generateWithFallback(prompt, config);
-        } catch (error) {
-            console.error('AI Summary Error:', error);
-            throw new Error('Failed to generate summary after trying all available models.');
-        }
-    },
+      if (!candidate || !candidate.content?.parts?.[0]?.text) {
+        // This catches partial or other non-safety-related blocked responses
+        console.error(`Gemini API Error: Model ${modelName} did not return valid content.`, result);
+        throw new Error("Model did not return valid content.");
+      }
 
-    async generateQuiz(documentContent, numQuestions = 10) {
-        if (documentContent.length > 30000) {
-            console.warn(`Document truncated from ${documentContent.length} to 30000 chars`);
-        }
+      // The 'text' field is now a guaranteed JSON string.
+      // We just need to parse it.
+      const jsonResponseText = candidate.content.parts[0].text;
+      return JSON.parse(jsonResponseText); // This should now work!
 
-        const prompt = `Based on the following document, create exactly ${numQuestions} multiple choice questions to test comprehension and application.
-        
-Document content:
-${documentContent.substring(0, 30000)}
-
-Ensure each question has 4 distinct options (A, B, C, D) and an explanation for the correct choice.`;
-
-        const config = {
-            responseMimeType: 'application/json',
-            responseSchema: schemas.quiz,
-            temperature: 0.7, // Varied questions
-        };
-
-        try {
-            return await generateWithFallback(prompt, config);
-        } catch (error) {
-            console.error('AI Quiz Error:', error);
-            throw new Error('Failed to generate quiz after trying all available models.');
-        }
-    },
-
-    async generateFlashcards(documentContent, numCards = 20) {
-        if (documentContent.length > 30000) {
-            console.warn(`Document truncated from ${documentContent.length} to 30000 chars`);
-        }
-
-        const prompt = `Based on the following document, create exactly ${numCards} flashcards for effective studying.
-        
-Document content:
-${documentContent.substring(0, 30000)}
-
-Ensure the front is a key concept or term and the back is a clear definition/explanation.`;
-
-        const config = {
-            responseMimeType: 'application/json',
-            responseSchema: schemas.flashcards,
-            temperature: 0.5, // Balanced
-        };
-
-        try {
-            return await generateWithFallback(prompt, config);
-        } catch (error) {
-            console.error('AI Flashcard Error:', error);
-            throw new Error('Failed to generate flashcards after trying all available models.');
-        }
+    } catch (error) {
+      console.error(`Gemini API call failed (model: ${modelName}, attempt ${4 - retries}):`, error.message);
+      retries--;
+      if (retries === 0) {
+        throw new Error(`Model ${modelName} failed after 3 attempts.`);
+      }
+      // Exponential backoff wait
+      await new Promise(res => setTimeout(res, 1000 * (3 - retries)));
     }
-};
+  }
+}
 
-module.exports = aiService;
+// Main function to generate the summary
+async function generateSummary(documentContent) {
+  // --- UPDATED FALLBACK ORDER ---
+  // Try 'pro' first for large docs, then 'flash' and 'flash-lite'
+  const modelsToTry = [
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite'
+  ];
+
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`Attempting generation with model: ${modelName}`);
+      
+      const summary = await callGeminiForSummary(documentContent, modelName);
+      
+      // Success!
+      return summary;
+
+    } catch (error) {
+      // Log the failure and try the next model
+      console.error(`Model ${modelName} failed: ${error.message}`);
+    }
+  }
+
+  // If all models failed
+  console.error("AI Summary Error: All models failed.");
+  throw new Error("Failed to generate summary after trying all available models.");
+}
+
+// Make sure to export your main function
+module.exports = {
+  generateSummary
+};

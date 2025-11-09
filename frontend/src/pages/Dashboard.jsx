@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { FileText, Brain, BookOpen, GraduationCap, BarChart3 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -9,6 +10,37 @@ const Dashboard = () => {
     logout();
     navigate('/login');
   };
+
+  const features = [
+    {
+      icon: <FileText className="h-12 w-12" />,
+      title: 'Documents',
+      description: 'Upload and manage your study materials',
+      action: () => navigate('/documents'),
+      color: 'blue',
+    },
+    {
+      icon: <Brain className="h-12 w-12" />,
+      title: 'AI Summaries',
+      description: 'Generate smart summaries and notes',
+      action: () => navigate('/documents'),
+      color: 'purple',
+    },
+    {
+      icon: <BookOpen className="h-12 w-12" />,
+      title: 'Quizzes',
+      description: 'Test your knowledge with AI-generated quizzes',
+      action: () => navigate('/documents'),
+      color: 'green',
+    },
+    {
+      icon: <GraduationCap className="h-12 w-12" />,
+      title: 'Flashcards',
+      description: 'Study with spaced repetition',
+      action: () => navigate('/documents'),
+      color: 'orange',
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -28,18 +60,49 @@ const Dashboard = () => {
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">Dashboard</h2>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600">
-            Welcome to your AI Study Platform dashboard! Features coming soon:
-          </p>
-          <ul className="mt-4 space-y-2 text-gray-700">
-            <li>📄 Upload documents</li>
-            <li>📝 Generate AI summaries and notes</li>
-            <li>❓ Create quizzes automatically</li>
-            <li>🎴 Generate flashcards</li>
-            <li>📊 Track your progress</li>
-          </ul>
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h2>
+        <p className="text-gray-600 mb-8">
+          Your AI-powered study assistant
+        </p>
+
+        {/* Feature Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {features.map((feature, index) => (
+            <button
+              key={index}
+              onClick={feature.action}
+              className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition text-left group`}
+            >
+              <div className={`text-${feature.color}-600 mb-4 group-hover:scale-110 transition`}>
+                {feature.icon}
+              </div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 text-sm">
+                {feature.description}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Stats</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600">0</div>
+              <div className="text-gray-600 text-sm mt-1">Documents Uploaded</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-green-600">0</div>
+              <div className="text-gray-600 text-sm mt-1">Quizzes Taken</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600">0</div>
+              <div className="text-gray-600 text-sm mt-1">Study Sessions</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

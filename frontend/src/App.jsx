@@ -3,8 +3,9 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Documents from './pages/Documents';
+import Summary from './pages/Summary';
 
-// Protected route wrapper
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
@@ -30,7 +31,23 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route 
+            path="/documents" 
+            element={
+              <ProtectedRoute>
+                <Documents />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/documents/:id/summary" 
+            element={
+              <ProtectedRoute>
+                <Summary />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -14,14 +14,20 @@ const storage = multer.diskStorage({
 
 // File filter - only PDFs and text files
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = /pdf|txt/;
-  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = allowedTypes.test(file.mimetype);
+  // Regex to check for .pdf or .txt extensions (case-insensitive)
+  const allowedExts = /^\.(pdf|txt)$/i;
+  // Regex to check for application/pdf or text/plain mimetypes
+  const allowedMimes = /^(application\/pdf|text\/plain)$/i;
 
-  if (extname && mimetype) {
+  const extMatches = allowedExts.test(path.extname(file.originalname));
+  const mimeMatches = allowedMimes.test(file.mimetype);
+
+  if (extMatches && mimeMatches) {
+    // Both extension and mimetype are good
     cb(null, true);
   } else {
-    cb(new Error('Only PDF and TXT files are allowed'));
+    // One of them failed
+    cb(new Error('Only PDF and TXT files are allowed'), false);
   }
 };
 
