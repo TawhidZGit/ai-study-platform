@@ -41,3 +41,17 @@ CREATE TABLE IF NOT EXISTS flashcard_sets (
   cards JSONB NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Flashcard review progress table
+CREATE TABLE IF NOT EXISTS flashcard_reviews (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  flashcard_set_id INTEGER REFERENCES flashcard_sets(id) ON DELETE CASCADE,
+  card_index INTEGER NOT NULL,
+  ease_factor DECIMAL DEFAULT 2.5,
+  interval INTEGER DEFAULT 1,
+  next_review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  last_reviewed TIMESTAMP,
+  times_reviewed INTEGER DEFAULT 0,
+  UNIQUE(user_id, flashcard_set_id, card_index)
+);

@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 // This is the JSON "blueprint" the model MUST follow.
-// It matches what your Summary.jsx component expects.
+// This matches what Summary.jsx component expects.
 const summarySchema = {
   type: "OBJECT",
   properties: {
@@ -27,13 +27,12 @@ const summarySchema = {
       description: "A simple, 'Explain Like I'm 5' (ELI5) version of the main topic." 
     }
   },
-  // This ensures all fields are always returned
+  // Ensures all fields are always returned
   required: ["tldr", "keyPoints", "detailedNotes", "simpleExplanation"]
 };
 
-// This is your prompt to the model.
+// Prompt to the model.
 function createSummaryPrompt(documentContent) {
-  // We are no longer truncating. The full document content is passed.
   return `
     Please analyze the following document and generate a set of study notes in the required JSON format.
     
@@ -48,7 +47,7 @@ function createSummaryPrompt(documentContent) {
 
 // Helper function to call the Gemini API
 async function callGeminiForSummary(documentContent, modelName) {
-  // We load the API key from your .env file
+  // Load the API key from .env file
   const apiKey = process.env.GEMINI_API_KEY || "";
   if (!apiKey) {
     console.error("GEMINI_API_KEY not found. Please set it in your .env file.");
@@ -99,10 +98,9 @@ async function callGeminiForSummary(documentContent, modelName) {
         throw new Error("Model did not return valid content.");
       }
 
-      // The 'text' field is now a guaranteed JSON string.
-      // We just need to parse it.
+      // The 'text' field is a JSON string.
       const jsonResponseText = candidate.content.parts[0].text;
-      return JSON.parse(jsonResponseText); // This should now work!
+      return JSON.parse(jsonResponseText);
 
     } catch (error) {
       console.error(`Gemini API call failed (model: ${modelName}, attempt ${4 - retries}):`, error.message);
@@ -118,7 +116,7 @@ async function callGeminiForSummary(documentContent, modelName) {
 
 // Main function to generate the summary
 async function generateSummary(documentContent) {
-  // --- UPDATED FALLBACK ORDER ---
+  // --- FALLBACK ORDER ---
   // Try 'pro' first for large docs, then 'flash' and 'flash-lite'
   const modelsToTry = [
     'gemini-2.5-pro',
@@ -146,7 +144,7 @@ async function generateSummary(documentContent) {
   throw new Error("Failed to generate summary after trying all available models.");
 }
 
-// Make sure to export your main function
+// Export main function
 module.exports = {
   generateSummary
 };

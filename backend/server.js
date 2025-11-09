@@ -30,6 +30,8 @@ require('./config/db');
 // Import routes
 const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
+const quizRoutes = require('./routes/quizzes');
+const flashcardRoutes = require('./routes/flashcards');
 
 // Test route - MUST come before other routes
 app.get('/', (req, res) => {
@@ -39,6 +41,8 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/quizzes', quizRoutes);
+app.use('/api/flashcards', flashcardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -5,6 +5,10 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Documents from './pages/Documents';
 import Summary from './pages/Summary';
+import Quiz from './pages/Quiz';
+import Flashcards from './pages/Flashcards';
+
+
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -48,6 +52,38 @@ function App() {
             } 
           />
           <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route 
+            path="/documents/:documentId/quiz" 
+            element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/quiz/:id" 
+            element={
+              <ProtectedRoute>
+                <Quiz />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/documents/:documentId/flashcards" 
+            element={
+              <ProtectedRoute>
+                <Flashcards />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/flashcards/:id" 
+            element={
+              <ProtectedRoute>
+                <Flashcards />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
