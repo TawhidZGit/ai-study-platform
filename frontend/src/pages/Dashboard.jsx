@@ -1,10 +1,26 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import api from '../utils/api';
 import { FileText, Brain, BookOpen, GraduationCap, BarChart3 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/stats/overview');
+      setStats(response.data.stats);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -40,6 +56,13 @@ const Dashboard = () => {
       action: () => navigate('/documents'),
       color: 'orange',
     },
+    {
+      icon: <BarChart3 className="h-12 w-12" />,
+      title: 'Progress',
+      description: 'Track your study statistics',
+      action: () => navigate('/progress'),
+      color: 'indigo',
+    },
   ];
 
   return (
@@ -66,7 +89,7 @@ const Dashboard = () => {
         </p>
 
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {features.map((feature, index) => (
             <button
               key={index}
@@ -87,20 +110,38 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Stats */}
-        <div className="mt-8 bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Stats</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">0</div>
-              <div className="text-gray-600 text-sm mt-1">Documents Uploaded</div>
+              <div className="text-3xl font-bold text-blue-600">
+                {stats?.totalDocuments || 0}
+              </div>
+              <div className="text-gray-600 text-sm mt-1">Documents</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">0</div>
+              <div className="text-3xl font-bold text-green-600">
+                {stats?.totalQuizzes || 0}
+              </div>
               <div className="text-gray-600 text-sm mt-1">Quizzes Taken</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">0</div>
-              <div className="text-gray-600 text-sm mt-1">Study Sessions</div>
+              <div className="text-3xl font-bold text-purple-600">
+                {stats?.totalFlashcardSets || 0}
+              </div>
+              <div className="text-gray-600 text-sm mt-1">Flashcard Sets</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-orange-600">
+                {stats?.averageQuizScore || 0}%
+              </div>
+              <div className="text-gray-600 text-sm mt-1">Avg Quiz Score</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-pink-600">
+                {stats?.totalFlashcardsReviewed || 0}
+              </div>
+              <div className="text-gray-600 text-sm mt-1">Cards Reviewed</div>
             </div>
           </div>
         </div>

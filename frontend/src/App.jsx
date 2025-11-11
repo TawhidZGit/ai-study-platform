@@ -7,6 +7,7 @@ import Documents from './pages/Documents';
 import Summary from './pages/Summary';
 import Quiz from './pages/Quiz';
 import Flashcards from './pages/Flashcards';
+import Progress from './pages/Progress';
 
 
 
@@ -81,6 +82,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Flashcards />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/progress" 
+            element={
+              <ProtectedRoute>
+                <Progress />
               </ProtectedRoute>
             } 
           />

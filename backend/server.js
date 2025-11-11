@@ -32,6 +32,7 @@ const authRoutes = require('./routes/auth');
 const documentRoutes = require('./routes/documents');
 const quizRoutes = require('./routes/quizzes');
 const flashcardRoutes = require('./routes/flashcards');
+const statsRoutes = require('./routes/stats');
 
 // Test route - MUST come before other routes
 app.get('/', (req, res) => {
@@ -43,6 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/quizzes', quizRoutes);
 app.use('/api/flashcards', flashcardRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
