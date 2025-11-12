@@ -205,4 +205,97 @@ router.get('/flashcard-progress', async (req, res) => {
   }
 });
 
+// Get user streak data
+router.get('/streak', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM user_streaks WHERE user_id = $1',
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({
+        streak: {
+          currentStreak: 0,
+          longestStreak: 0,
+          totalStudyDays: 0,
+          lastStudyDate: null
+        }
+      });
+    }
+
+    const streak = result.rows[0];
+    res.json({
+      streak: {
+        currentStreak: streak.current_streak,
+        longestStreak: streak.longest_streak,
+        totalStudyDays: streak.total_study_days,
+        lastStudyDate: streak.last_study_date
+      }
+    });
+  } catch (error) {
+    console.error('Get streak error:', error);
+    res.status(500).json({ error: 'Failed to fetch streak data' });
+  }
+});
+
+// Get user achievements
+router.get('/achievements', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT achievement_type, achievement_name, earned_at 
+       FROM user_achievements 
+       WHERE user_id = $1
+       ORDER BY earned_at DESC`,
+      [req.user.id]
+    );
+
+    res.json({ achievements: result.rows });
+  } catch (error) {
+    console.error('Get achievements error:', error);
+    res.status(500).json({ error: 'Failed to fetch achievements' });
+  }
+});
+
+// Get all available achievements (with earned status)
+router.get('/achievements/all', async (req, res) => {
+  try {
+    const allAchievements = [
+      { type: 'first_doc', name: 'First Document', description: 'Upload your first document', category: 'milestone' },
+      { type: 'doc_10', name: '10 Documents', description: 'Upload 10 documents', category: 'milestone' },
+      { type: 'first_quiz', name: 'First Quiz', description: 'Complete your first quiz', category: 'milestone' },
+      { type: 'quiz_10', name: '10 Quizzes', description: 'Complete 10 quizzes', category: 'milestone' },
+      { type: 'quiz_50', name: '50 Quizzes', description: 'Complete 50 quizzes', category: 'milestone' },
+      { type: 'reviews_100', name: '100 Card Reviews', description: 'Review 100 flashcards', category: 'milestone' },
+      { type: 'reviews_500', name: '500 Card Reviews', description: 'Review 500 flashcards', category: 'milestone' },
+      { type: 'streak_3', name: '3 Day Streak', description: 'Study for 3 days in a row', category: 'streak' },
+      { type: 'streak_7', name: '7 Day Streak', description: 'Study for 7 days in a row', category: 'streak' },
+      { type: 'streak_14', name: '14 Day Streak', description: 'Study for 14 days in a row', category: 'streak' },
+      { type: 'streak_30', name: '30 Day Streak', description: 'Study for 30 days in a row', category: 'streak' },
+      { type: 'streak_100', name: '100 Day Streak', description: 'Study for 100 days in a row', category: 'streak' },
+    ];
+
+    const earnedResult = await pool.query(
+      'SELECT achievement_type, earned_at FROM user_achievements WHERE user_id = $1',
+      [req.user.id]
+    );
+
+    const earnedMap = {};
+    earnedResult.rows.forEach(row => {
+      earnedMap[row.achievement_type] = row.earned_at;
+    });
+
+    const achievements = allAchievements.map(achievement => ({
+      ...achievement,
+      earned: !!earnedMap[achievement.type],
+      earnedAt: earnedMap[achievement.type] || null
+    }));
+
+    res.json({ achievements });
+  } catch (error) {
+    console.error('Get all achievements error:', error);
+    res.status(500).json({ error: 'Failed to fetch achievements' });
+  }
+});
+
 module.exports = router;

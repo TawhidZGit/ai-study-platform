@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../config/db');
 const authenticateToken = require('../middleware/auth');
 const quizService = require('../services/quizService');
+const streakService = require('../services/streakService');
 
 const router = express.Router();
 
@@ -133,6 +134,10 @@ router.post('/:id/submit', async (req, res) => {
       'INSERT INTO study_sessions (user_id, quiz_id, score, total_questions) VALUES ($1, $2, $3, $4)',
       [req.user.id, req.params.id, score, questions.length]
     );
+
+    // Update streak and check achievements
+    await streakService.updateStreak(req.user.id);
+    await streakService.checkMilestoneAchievements(req.user.id);
 
     res.json({
       score: score,

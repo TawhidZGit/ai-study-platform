@@ -2,6 +2,7 @@ const express = require('express');
 const pool = require('../config/db');
 const authenticateToken = require('../middleware/auth');
 const flashcardService = require('../services/flashcardService');
+const streakService = require('../services/streakService');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -197,6 +198,10 @@ router.post('/:id/review', async (req, res) => {
        WHERE id = $4`,
       [newEaseFactor, newInterval, nextReviewDate, review.id]
     );
+
+    // Update streak and check achievements
+    await streakService.updateStreak(req.user.id);
+    await streakService.checkMilestoneAchievements(req.user.id);
 
     res.json({
       message: 'Review recorded',

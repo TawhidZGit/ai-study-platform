@@ -2,15 +2,18 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { FileText, Brain, BookOpen, GraduationCap, BarChart3 } from 'lucide-react';
+import { FileText, Brain, BookOpen, GraduationCap, BarChart3, Flame, Trophy } from 'lucide-react';
+
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
+  const [streak, setStreak] = useState(null);
 
   useEffect(() => {
     fetchStats();
+    fetchStreak();
   }, []);
 
   const fetchStats = async () => {
@@ -19,6 +22,15 @@ const Dashboard = () => {
       setStats(response.data.stats);
     } catch (error) {
       console.error('Error fetching stats:', error);
+    }
+  };
+
+  const fetchStreak = async () => {
+    try {
+      const response = await api.get('/stats/streak');
+      setStreak(response.data.streak);
+    } catch (error) {
+      console.error('Error fetching streak:', error);
     }
   };
 
@@ -63,6 +75,13 @@ const Dashboard = () => {
       action: () => navigate('/progress'),
       color: 'indigo',
     },
+    {
+    icon: <Trophy className="h-12 w-12" />,  // Add this
+    title: 'Achievements',
+    description: 'View your unlocked achievements',
+    action: () => navigate('/achievements'),
+    color: 'yellow',
+  },
   ];
 
   return (
@@ -88,8 +107,31 @@ const Dashboard = () => {
           Your AI-powered study assistant
         </p>
 
+        {/* Streak Banner */}
+        {streak && streak.currentStreak > 0 && (
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-lg shadow-lg p-6 mb-8 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="bg-white bg-opacity-20 p-3 rounded-lg">
+                  <Flame className="h-8 w-8" />
+                </div>
+                <div>
+                  <div className="text-3xl font-bold">{streak.currentStreak} Day Streak!</div>
+                  <p className="text-orange-100">Keep it up! Don't break your streak.</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/achievements')}
+                className="bg-white text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-orange-50 transition"
+              >
+                View Achievements
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Feature Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
           {features.map((feature, index) => (
             <button
               key={index}

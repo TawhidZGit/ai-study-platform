@@ -55,3 +55,25 @@ CREATE TABLE IF NOT EXISTS flashcard_reviews (
   times_reviewed INTEGER DEFAULT 0,
   UNIQUE(user_id, flashcard_set_id, card_index)
 );
+
+-- User streaks and achievements table
+CREATE TABLE IF NOT EXISTS user_streaks (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  current_streak INTEGER DEFAULT 0,
+  longest_streak INTEGER DEFAULT 0,
+  last_study_date DATE,
+  total_study_days INTEGER DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Achievements table
+CREATE TABLE IF NOT EXISTS user_achievements (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  achievement_type VARCHAR(50) NOT NULL,
+  achievement_name VARCHAR(100) NOT NULL,
+  earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, achievement_type)
+);
