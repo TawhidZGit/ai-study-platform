@@ -9,6 +9,9 @@ An AI-powered study platform that helps students learn more efficiently by gener
 - ❓ **Quiz Generation** - AI creates custom quizzes from uploaded documents
 - 🎴 **Flashcards** - Automatic flashcard generation for spaced repetition
 - 📊 **Progress Tracking** - Track your study sessions and improvement
+- 🔥 **Study Streaks** - Daily streak tracking to build study habits
+- 🏆 **Achievements** - Unlock badges for milestones
+- 📈 **Analytics Dashboard** - Visualize your learning progress
 
 ## Tech Stack
 
@@ -17,12 +20,15 @@ An AI-powered study platform that helps students learn more efficiently by gener
 - Tailwind CSS
 - React Router
 - Axios
+- Recharts
 
 **Backend:**
 - Node.js + Express
 - PostgreSQL (Supabase)
 - JWT Authentication
 - Google Gemini AI
+- Multer (file uploads)
+- pdf-parse (PDF extraction)
 
 ## Setup Instructions
 
@@ -30,6 +36,14 @@ An AI-powered study platform that helps students learn more efficiently by gener
 - Node.js (v18+)
 - PostgreSQL database (or Supabase account)
 - Google Gemini API key
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/ai-study-platform.git
+cd ai-study-platform
+```
 
 ### Backend Setup
 
@@ -54,6 +68,9 @@ cp .env.example .env
 ```bash
 npm run dev
 ```
+## Database Setup
+
+Run the SQL commands in `backend/config/setup.sql` in your PostgreSQL database to create the necessary tables.
 
 ### Frontend Setup
 
@@ -74,14 +91,60 @@ npm run dev
 
 4. Open browser to `http://localhost:5173`
 
-## Database Setup
+4. **Access the application**
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:5001`
 
-Run the SQL commands in `backend/config/setup.sql` in your PostgreSQL database to create the necessary tables.
+## 📖 Usage
+
+1. **Register/Login** - Create an account or log in
+2. **Upload Documents** - Upload PDFs or text files
+3. **Generate Content**:
+   - Click "Generate Summary" for AI-powered notes
+   - Click "Create Quiz" for practice questions
+   - Click "Make Flashcards" for spaced repetition
+4. **Track Progress** - View statistics and achievements
+5. **Build Streaks** - Study daily to maintain your streak
+
+ ## 🎯 Key Features Explained
+
+### AI Summaries
+- **TL;DR**: Quick 2-3 sentence overview
+- **Key Points**: 5-8 main takeaways
+- **Detailed Notes**: Comprehensive study material
+- **ELI5**: Simplified explanations
+
+### Spaced Repetition
+Uses the SM-2 algorithm to optimize flashcard review timing:
+- **Again**: Review in 1 day
+- **Hard**: Review in 2-3 days
+- **Good**: Review in 4-7 days
+- **Easy**: Review in 7+ days
+
+### Achievements System
+Unlock badges for:
+- Uploading documents
+- Taking quizzes
+- Maintaining study streaks
+- Reviewing flashcards
+
+## 🔒 Security Features
+
+- JWT-based authentication
+- Password hashing with bcryptjs
+- SQL injection prevention
+- Protected API routes
+- Secure file upload handling
 
 ## Project Status
 
 🚧 **In Development** - This project is actively being built as a portfolio piece.
 
+## 🤝 Contributing
+
+Want to improve AI Study Platform?. Feel free to fork and modify for your own use!
+Feel free to contribute! Pull requests are welcome.
+
 ## License
 
-MIT
+MIT License - See LICENSE file for details

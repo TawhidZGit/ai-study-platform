@@ -9,9 +9,7 @@ import Quiz from './pages/Quiz';
 import Flashcards from './pages/Flashcards';
 import Progress from './pages/Progress';
 import Achievements from './pages/Achievements';
-
-
-
+import NotFound from './pages/NotFound';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -54,7 +52,6 @@ function App() {
               </ProtectedRoute>
             } 
           />
-          <Route path="/" element={<Navigate to="/dashboard" />} />
           <Route 
             path="/documents/:documentId/quiz" 
             element={
@@ -103,6 +100,8 @@ function App() {
               </ProtectedRoute>
             } 
           />
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
