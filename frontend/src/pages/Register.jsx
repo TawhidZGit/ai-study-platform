@@ -45,7 +45,7 @@ const Register = () => {
     });
     
     if (result.success) {
-      navigate('/dashboard');
+      navigate('/projects');
     } else {
       setError(result.error);
     }
