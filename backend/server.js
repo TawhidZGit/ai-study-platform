@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const app = express();
 
-// CORS middleware - configure properly for development
+// CORS middleware
 const corsOptions = {
   origin: 'http://localhost:5173',
   credentials: true,
@@ -14,11 +14,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// Body parser middleware MUST come before routes
 app.use(express.json());
 
-// Logging middleware (helps debug)
+// Logging middleware
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
@@ -29,22 +27,18 @@ require('./config/db');
 
 // Import routes
 const authRoutes = require('./routes/auth');
-const documentRoutes = require('./routes/documents');
-const quizRoutes = require('./routes/quizzes');
-const flashcardRoutes = require('./routes/flashcards');
-const statsRoutes = require('./routes/stats');
+const projectRoutes = require('./routes/projects');
+const sourceRoutes = require('./routes/sources');
 
-// Test route - MUST come before other routes
+// Test route
 app.get('/', (req, res) => {
-  res.json({ message: 'AI Study Platform API is running!' });
+  res.json({ message: 'AI Study Platform API - Workspace Edition' });
 });
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/quizzes', quizRoutes);
-app.use('/api/flashcards', flashcardRoutes);
-app.use('/api/stats', statsRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/sources', sourceRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -53,7 +47,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 CORS enabled for http://localhost:5173`);
