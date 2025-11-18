@@ -31,6 +31,7 @@ const projectRoutes = require('./routes/projects');
 const sourceRoutes = require('./routes/sources');
 const notesRoutes = require('./routes/notes');
 const chatRoutes = require('./routes/chat');
+const generationRoutes = require('./routes/generation');
 
 // Test route
 app.get('/', (req, res) => {
@@ -43,6 +44,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/sources', sourceRoutes);
 app.use('/api/notes', notesRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/generation', generationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

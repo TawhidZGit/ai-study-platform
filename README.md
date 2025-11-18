@@ -19,6 +19,8 @@ An AI-powered study platform that helps students learn more efficiently by gener
 - React + Vite
 - Tailwind CSS
 - React Router
+- TipTap (Rich Text Editor)
+- react-resizable-panels
 - Axios
 - Recharts
 
@@ -28,7 +30,7 @@ An AI-powered study platform that helps students learn more efficiently by gener
 - JWT Authentication
 - Google Gemini AI
 - Multer (file uploads)
-- pdf-parse (PDF extraction)
+- pdf-parse
 
 ## Setup Instructions
 
@@ -106,7 +108,32 @@ npm run dev
 4. **Track Progress** - View statistics and achievements
 5. **Build Streaks** - Study daily to maintain your streak
 
- ## 🎯 Key Features Explained
+## ✨ Features
+
+### 📁 **Project-Based Organization**
+- Create unlimited projects for different subjects/topics
+- Color-coded projects for easy identification
+- Track sources and notes per project
+
+### 🖥️ **Resizable Workspace Layout**
+- **Sources Panel**: Upload and manage PDFs and text files
+- **Chat Panel**: Conversational AI with 4 modes (Study, Quiz, Explain, Summarize)
+- **Notes Panel**: Rich text editor with auto-save
+- **AI Tools**: Generate quizzes, flashcards, and summaries
+- Collapsible panels with icon docks
+
+### 🤖 **AI-Powered Features**
+- **Context-Aware Chat**: AI references your uploaded sources
+- **Quiz Generation**: Multiple-choice questions with explanations
+- **Flashcard Creation**: Front/back cards for studying
+- **Smart Summaries**: TL;DR, key points, detailed notes, ELI5
+- **Multiple Chat Modes**: Study tutor, quiz master, explainer, summarizer
+
+### 📝 **Rich Text Notes**
+- Full-featured text editor
+- Auto-save functionality
+- Bold, italic, headings, lists
+- Organize notes per project
 
 ### AI Summaries
 - **TL;DR**: Quick 2-3 sentence overview
@@ -135,6 +162,10 @@ Unlock badges for:
 - SQL injection prevention
 - Protected API routes
 - Secure file upload handling
+
+## 📸 Screenshots
+
+[Insert screenshots of workspace]
 
 ## Project Status
 
