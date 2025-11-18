@@ -5,14 +5,16 @@ import api from '../utils/api';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { 
   ArrowLeft, Settings, Loader2, 
-  ChevronLeft, ChevronRight,
-  PanelLeftClose, PanelLeftOpen, // Added specific panel icons for clarity
-  PanelRightClose, PanelRightOpen
+  PanelLeftClose, PanelLeftOpen,
+  PanelRightClose, PanelRightOpen,
+  FileText, StickyNote, Sparkles
 } from 'lucide-react';
 
 import SourcesPanel from '../components/workspace/SourcesPanel';
 import ChatPanel from '../components/workspace/ChatPanel';
 import NotesToolsPanel from '../components/workspace/NotesToolsPanel';
+import SourcesDock from '../components/workspace/SourcesDock';
+import NotesDock from '../components/workspace/NotesDock';
 
 const Workspace = () => {
   const { id } = useParams();
@@ -26,8 +28,14 @@ const Workspace = () => {
   const [sourcesCollapsed, setSourcesCollapsed] = useState(false);
   const [notesCollapsed, setNotesCollapsed] = useState(false);
 
+  // Data for docks
+  const [sources, setSources] = useState([]);
+  const [notes, setNotes] = useState([]);
+
   useEffect(() => {
     fetchProject();
+    fetchSources();
+    fetchNotes();
   }, [id]);
 
   const fetchProject = async () => {
@@ -39,6 +47,24 @@ const Workspace = () => {
       setError('Failed to load project');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchSources = async () => {
+    try {
+      const response = await api.get(`/sources/project/${id}`);
+      setSources(response.data.sources);
+    } catch (error) {
+      console.error('Error fetching sources:', error);
+    }
+  };
+
+  const fetchNotes = async () => {
+    try {
+      const response = await api.get(`/notes/project/${id}`);
+      setNotes(response.data.notes || []);
+    } catch (error) {
+      console.error('Error fetching notes:', error);
     }
   };
 
@@ -86,78 +112,98 @@ const Workspace = () => {
       </header>
 
       {/* Workspace Area */}
-      <div className="flex-1 overflow-hidden">
-        <PanelGroup direction="horizontal" autoSaveId={`workspace-layout-${id}`} className="h-full">
-          
-          {/* === LEFT PANEL (SOURCES) === */}
-          {!sourcesCollapsed && (
-            <>
-              <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white">
-                 {/* We wrap the component in a flex container to handle the height properly */}
-                 <div className="h-full flex flex-col">
-                    <SourcesPanel projectId={id} />
-                 </div>
-              </Panel>
-              
-              <PanelResizeHandle className="w-2 bg-transparent hover:bg-blue-100 transition-colors cursor-col-resize flex items-center justify-center -ml-1 z-10">
-                 <div className="w-0.5 h-8 bg-gray-300 rounded-full" />
-              </PanelResizeHandle>
-            </>
-          )}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Left Dock (when sources collapsed) */}
+        {sourcesCollapsed && (
+          <SourcesDock 
+            sources={sources} 
+            onExpand={() => setSourcesCollapsed(false)}
+            onSourceClick={(sourceId) => {
+              // Optionally auto-expand and select source
+              setSourcesCollapsed(false);
+            }}
+          />
+        )}
 
-          {/* === MIDDLE PANEL (CHAT) === */}
-          <Panel order={2} minSize={30} className="bg-white flex flex-col relative">
+        {/* Main Panel Area */}
+        <div className="flex-1 overflow-hidden">
+          <PanelGroup direction="horizontal" autoSaveId={`workspace-layout-${id}`} className="h-full">
             
-            {/* TOOLBAR HEADER 
-                This sits explicitly in the document flow (no 'absolute'). 
-                It pushes the ChatPanel down so text is never covered.
-            */}
-            <div className="h-12 border-b border-gray-100 flex items-center justify-between px-4 bg-white flex-shrink-0">
+            {/* === LEFT PANEL (SOURCES) === */}
+            {!sourcesCollapsed && (
+              <>
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white">
+                  <div className="h-full flex flex-col">
+                    <SourcesPanel projectId={id} onSourcesUpdate={fetchSources} />
+                  </div>
+                </Panel>
+                
+                <PanelResizeHandle className="w-2 bg-transparent hover:bg-blue-100 transition-colors cursor-col-resize flex items-center justify-center z-10">
+                  <div className="w-0.5 h-8 bg-gray-300 rounded-full" />
+                </PanelResizeHandle>
+              </>
+            )}
+
+            {/* === MIDDLE PANEL (CHAT) === */}
+            <Panel order={2} minSize={30} className="bg-white flex flex-col relative">
               
-              {/* Left Toggle Control */}
-              <button
-                onClick={() => setSourcesCollapsed(!sourcesCollapsed)}
-                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
-                title={sourcesCollapsed ? "Expand Sources" : "Collapse Sources"}
-              >
-                {sourcesCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
-              </button>
+              {/* Toolbar Header */}
+              <div className="h-12 border-b border-gray-100 flex items-center justify-between px-4 bg-white flex-shrink-0">
+                
+                {/* Left Toggle */}
+                <button
+                  onClick={() => setSourcesCollapsed(!sourcesCollapsed)}
+                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
+                  title={sourcesCollapsed ? "Expand Sources" : "Collapse Sources"}
+                >
+                  {sourcesCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
+                </button>
 
-              {/* Optional: Middle Title (e.g. "Chat") */}
-              <span className="text-sm font-medium text-gray-400">Workspace Chat</span>
+                <span className="text-sm font-medium text-gray-400">Workspace Chat</span>
 
-              {/* Right Toggle Control */}
-              <button
-                onClick={() => setNotesCollapsed(!notesCollapsed)}
-                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
-                title={notesCollapsed ? "Expand Notes" : "Collapse Notes"}
-              >
-                {notesCollapsed ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
-              </button>
-            </div>
+                {/* Right Toggle */}
+                <button
+                  onClick={() => setNotesCollapsed(!notesCollapsed)}
+                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
+                  title={notesCollapsed ? "Expand Notes" : "Collapse Notes"}
+                >
+                  {notesCollapsed ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
+                </button>
+              </div>
 
-            {/* Main Content - flex-1 ensures it fills remaining space */}
-            <div className="flex-1 overflow-hidden">
-              <ChatPanel projectId={id} />
-            </div>
+              {/* Main Content */}
+              <div className="flex-1 overflow-hidden">
+                <ChatPanel projectId={id} />
+              </div>
+            </Panel>
 
-          </Panel>
+            {/* === RIGHT PANEL (NOTES) === */}
+            {!notesCollapsed && (
+              <>
+                <PanelResizeHandle className="w-2 bg-transparent hover:bg-blue-100 transition-colors cursor-col-resize flex items-center justify-center z-10">
+                  <div className="w-0.5 h-8 bg-gray-300 rounded-full" />
+                </PanelResizeHandle>
 
-          {/* === RIGHT PANEL (NOTES) === */}
-          {!notesCollapsed && (
-            <>
-              <PanelResizeHandle className="w-2 bg-transparent hover:bg-blue-100 transition-colors cursor-col-resize flex items-center justify-center -mr-1 z-10">
-                <div className="w-0.5 h-8 bg-gray-300 rounded-full" />
-              </PanelResizeHandle>
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white">
+                  <div className="h-full flex flex-col">
+                    <NotesToolsPanel projectId={id} onNotesUpdate={fetchNotes} />
+                  </div>
+                </Panel>
+              </>
+            )}
+          </PanelGroup>
+        </div>
 
-              <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white">
-                 <div className="h-full flex flex-col">
-                   <NotesToolsPanel projectId={id} />
-                 </div>
-              </Panel>
-            </>
-          )}
-        </PanelGroup>
+        {/* Right Dock (when notes collapsed) */}
+        {notesCollapsed && (
+          <NotesDock 
+            notes={notes} 
+            onExpand={() => setNotesCollapsed(false)}
+            onNoteClick={(noteId) => {
+              setNotesCollapsed(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );

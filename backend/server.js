@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const notesRoutes = require('./routes/notes');
 require('dotenv').config();
 
 const app = express();
@@ -39,6 +40,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/sources', sourceRoutes);
+app.use('/api/notes', notesRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

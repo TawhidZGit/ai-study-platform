@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../../utils/api';
 import { Upload, FileText, Loader2, Trash2, Eye } from 'lucide-react';
 
-const SourcesPanel = ({ projectId }) => {
+const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
   const [sources, setSources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -18,6 +18,7 @@ const SourcesPanel = ({ projectId }) => {
     try {
       const response = await api.get(`/sources/project/${projectId}`);
       setSources(response.data.sources);
+      if (onSourcesUpdate) onSourcesUpdate(); // Notify parent
     } catch (error) {
       console.error('Error fetching sources:', error);
     } finally {
