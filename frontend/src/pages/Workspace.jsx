@@ -1,14 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import { 
-  ArrowLeft, Settings, Loader2, 
-  PanelLeftClose, PanelLeftOpen,
-  PanelRightClose, PanelRightOpen,
-  FileText, StickyNote, Sparkles
-} from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 
 import SourcesPanel from '../components/workspace/SourcesPanel';
 import ChatPanel from '../components/workspace/ChatPanel';
@@ -27,6 +22,10 @@ const Workspace = () => {
 
   const [sourcesCollapsed, setSourcesCollapsed] = useState(false);
   const [notesCollapsed, setNotesCollapsed] = useState(false);
+
+  // LIFTED STATE: AI Generation State now lives here so it persists when panel collapses
+  const [isGenerating, setIsGenerating] = useState(false);
+  const generatingRef = useRef(false);
 
   // Data for docks
   const [sources, setSources] = useState([]);
@@ -70,18 +69,18 @@ const Workspace = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
-          <p className="text-red-600 mb-4 text-lg">{error || 'Project not found'}</p>
-          <button onClick={() => navigate('/projects')} className="text-blue-600 hover:underline font-medium">
+          <p className="text-rose-600 mb-4 text-lg">{error || 'Project not found'}</p>
+          <button onClick={() => navigate('/projects')} className="text-indigo-600 hover:underline font-medium">
             Back to Projects
           </button>
         </div>
@@ -90,24 +89,42 @@ const Workspace = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-slate-50 font-sans text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
+      
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm px-4 py-3 flex-shrink-0 z-20">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 py-3 flex-shrink-0 z-20 supports-[backdrop-filter]:bg-white/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/projects')} className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600">
+            <button 
+              onClick={() => navigate('/projects')} 
+              className="p-2 hover:bg-slate-100 rounded-xl transition text-slate-500 hover:text-slate-700"
+              title="Back to Projects"
+            >
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full ring-2 ring-offset-1 ring-gray-100" style={{ backgroundColor: project.color || '#3b82f6' }} />
+              {/* Colored Dot */}
+              <div 
+                className="w-3 h-3 rounded-full ring-2 ring-offset-1 ring-slate-100" 
+                style={{ backgroundColor: project.color || '#4F46E5' }} 
+              />
               <div>
-                <h1 className="text-lg font-semibold text-gray-800 leading-tight">{project.name}</h1>
+                <h1 className="text-lg font-bold text-slate-800 leading-tight">
+                  {project.name}
+                </h1>
+                {project.description && (
+                  <p className="text-xs text-slate-500 truncate max-w-md font-medium">
+                    {project.description}
+                  </p>
+                )}
               </div>
             </div>
           </div>
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600">
-            <Settings className="h-5 w-5" />
-          </button>
+
+          {/* User info */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-slate-600">{user?.name}</span>
+          </div>
         </div>
       </header>
 
@@ -119,7 +136,6 @@ const Workspace = () => {
             sources={sources} 
             onExpand={() => setSourcesCollapsed(false)}
             onSourceClick={(sourceId) => {
-              // Optionally auto-expand and select source
               setSourcesCollapsed(false);
             }}
           />
@@ -132,61 +148,52 @@ const Workspace = () => {
             {/* === LEFT PANEL (SOURCES) === */}
             {!sourcesCollapsed && (
               <>
-                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white">
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white border-r border-slate-200">
                   <div className="h-full flex flex-col">
                     <SourcesPanel projectId={id} onSourcesUpdate={fetchSources} />
                   </div>
                 </Panel>
                 
-                <PanelResizeHandle className="w-2 bg-transparent hover:bg-blue-100 transition-colors cursor-col-resize flex items-center justify-center z-10">
-                  <div className="w-0.5 h-8 bg-gray-300 rounded-full" />
+                {/* Left Resize Handle */}
+                <PanelResizeHandle 
+                  className="w-2 bg-transparent hover:bg-indigo-50 transition-colors cursor-col-resize flex items-center justify-center z-10 group"
+                  onDoubleClick={() => setSourcesCollapsed(true)}
+                  title="Double-click to collapse sources"
+                >
+                  <div className="w-0.5 h-8 bg-slate-300 rounded-full group-hover:bg-indigo-400 transition-colors" />
                 </PanelResizeHandle>
               </>
             )}
 
             {/* === MIDDLE PANEL (CHAT) === */}
-            <Panel order={2} minSize={30} className="bg-white flex flex-col relative">
-              
-              {/* Toolbar Header */}
-              <div className="h-12 border-b border-gray-100 flex items-center justify-between px-4 bg-white flex-shrink-0">
-                
-                {/* Left Toggle */}
-                <button
-                  onClick={() => setSourcesCollapsed(!sourcesCollapsed)}
-                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
-                  title={sourcesCollapsed ? "Expand Sources" : "Collapse Sources"}
-                >
-                  {sourcesCollapsed ? <PanelLeftOpen className="h-5 w-5" /> : <PanelLeftClose className="h-5 w-5" />}
-                </button>
-
-                <span className="text-sm font-medium text-gray-400">Workspace Chat</span>
-
-                {/* Right Toggle */}
-                <button
-                  onClick={() => setNotesCollapsed(!notesCollapsed)}
-                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
-                  title={notesCollapsed ? "Expand Notes" : "Collapse Notes"}
-                >
-                  {notesCollapsed ? <PanelRightOpen className="h-5 w-5" /> : <PanelRightClose className="h-5 w-5" />}
-                </button>
-              </div>
-
-              {/* Main Content */}
+            <Panel order={2} minSize={30} className="bg-white flex flex-col relative z-0">
               <div className="flex-1 overflow-hidden">
                 <ChatPanel projectId={id} />
               </div>
             </Panel>
 
-            {/* === RIGHT PANEL (NOTES) === */}
+            {/* === RIGHT PANEL (NOTES & TOOLS) === */}
             {!notesCollapsed && (
               <>
-                <PanelResizeHandle className="w-2 bg-transparent hover:bg-blue-100 transition-colors cursor-col-resize flex items-center justify-center z-10">
-                  <div className="w-0.5 h-8 bg-gray-300 rounded-full" />
+                {/* Right Resize Handle */}
+                <PanelResizeHandle 
+                  className="w-2 bg-transparent hover:bg-indigo-50 transition-colors cursor-col-resize flex items-center justify-center z-10 group"
+                  onDoubleClick={() => setNotesCollapsed(true)}
+                  title="Double-click to collapse notes"
+                >
+                  <div className="w-0.5 h-8 bg-slate-300 rounded-full group-hover:bg-indigo-400 transition-colors" />
                 </PanelResizeHandle>
 
-                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white">
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white border-l border-slate-200">
                   <div className="h-full flex flex-col">
-                    <NotesToolsPanel projectId={id} onNotesUpdate={fetchNotes} />
+                    {/* PASSING THE LIFTED STATE DOWN */}
+                    <NotesToolsPanel 
+                      projectId={id} 
+                      onNotesUpdate={fetchNotes}
+                      isGenerating={isGenerating}
+                      setIsGenerating={setIsGenerating}
+                      generatingRef={generatingRef}
+                    />
                   </div>
                 </Panel>
               </>

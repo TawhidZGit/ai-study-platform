@@ -54,10 +54,9 @@ async function callGeminiForSummary(documentContent, modelName) {
     throw new Error("API key is missing.");
   }
 
-  // --- THIS IS THE FIX ---
-  // Corrected the typo in the API endpoint URL.
+
   const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-  // --- END OF FIX ---
+
 
   const prompt = createSummaryPrompt(documentContent);
 

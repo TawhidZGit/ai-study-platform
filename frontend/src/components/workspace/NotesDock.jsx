@@ -2,62 +2,50 @@ import { StickyNote, Sparkles, ChevronLeft } from 'lucide-react';
 
 const NotesDock = ({ notes, onExpand, onNoteClick }) => {
   return (
-    <div className="w-16 bg-gray-50 border-l border-gray-200 flex flex-col items-center py-4 gap-2">
+    <div className="w-16 bg-slate-50 border-l border-slate-200 flex flex-col items-center py-4 gap-1 h-full flex-shrink-0 z-10 px-0">
       {/* Expand Button */}
       <button
         onClick={onExpand}
-        className="w-12 h-12 flex items-center justify-center rounded-lg hover:bg-gray-200 transition text-gray-600 mb-2"
+        className="w-full h-12 flex items-center justify-center hover:bg-slate-100 active:scale-90 transition-all text-slate-500 mb-2"
         title="Expand Notes & Tools"
       >
         <ChevronLeft className="h-5 w-5" />
       </button>
 
       {/* Divider */}
-      <div className="w-8 h-px bg-gray-300 mb-2" />
+      <div className="w-8 h-px bg-slate-200 mb-2" />
 
       {/* AI Tools Section */}
-      <div className="mb-4">
+      <div className="mb-2 flex-shrink-0 w-full">
         <button
-          className="w-12 h-12 flex items-center justify-center rounded-lg hover:bg-purple-100 transition group relative"
+          className="w-full h-14 flex items-center justify-center hover:bg-violet-50 active:scale-90 active:rounded-lg transition-all group"
           title="AI Tools"
         >
-          <Sparkles className="h-5 w-5 text-purple-600" />
-          
-          {/* Tooltip */}
-          <div className="absolute right-full mr-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-            AI Tools
-            <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-gray-900" />
-          </div>
+          <Sparkles className="h-6 w-6 text-violet-600 group-hover:scale-110 transition-transform duration-200" />
         </button>
       </div>
 
       {/* Notes Icons */}
       {notes.length === 0 ? (
-        <div className="text-gray-400 text-xs text-center px-1 mt-4">
+        <div className="text-slate-300 text-[10px] font-medium text-center px-1 mt-4 rotate-90 whitespace-nowrap select-none">
           No notes
         </div>
       ) : (
-        <div className="flex flex-col gap-2 overflow-y-auto flex-1 w-full px-2">
+        <div className="flex flex-col w-full overflow-y-auto flex-1 no-scrollbar">
           {notes.map((note, index) => (
             <button
               key={note.id}
               onClick={() => onNoteClick(note.id)}
-              className="w-12 h-12 flex flex-col items-center justify-center rounded-lg hover:bg-yellow-100 transition group relative"
               title={note.title}
+              className="w-full h-14 flex flex-col items-center justify-center hover:bg-white hover:shadow-sm active:scale-90 active:rounded-lg transition-all group flex-shrink-0"
             >
               {/* Icon */}
-              <StickyNote className="h-5 w-5 text-yellow-600" />
+              <StickyNote className="h-6 w-6 text-amber-500 group-hover:scale-110 transition-transform duration-200" />
               
               {/* Note Number */}
-              <span className="text-[10px] font-medium text-gray-600 mt-0.5">
+              <span className="text-[10px] font-bold text-slate-400 mt-0.5 group-hover:text-amber-600 transition-colors">
                 #{index + 1}
               </span>
-
-              {/* Tooltip */}
-              <div className="absolute right-full mr-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity max-w-[200px] truncate">
-                {note.title}
-                <div className="absolute left-full top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-b-4 border-l-4 border-transparent border-l-gray-900" />
-              </div>
             </button>
           ))}
         </div>

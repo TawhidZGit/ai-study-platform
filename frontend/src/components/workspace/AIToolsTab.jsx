@@ -1,21 +1,38 @@
+import MarkdownRenderer from '../MarkdownRenderer';
 import { useState, useEffect } from 'react';
 import { 
-  Sparkles, BookOpen, GraduationCap, FileText, 
-  Loader2, Trash2, Download, Eye, X 
+  Sparkles, BrainCircuit, Layers, FileText, 
+  Loader2, Trash2, Eye, X, Maximize2, Minimize2, 
+  ArrowLeft, ArrowRight, CheckCircle, XCircle,
+  ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import api from '../../utils/api';
 
-const AIToolsTab = ({ projectId }) => {
-  const [generating, setGenerating] = useState(false);
+const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef }) => {
   const [generatedContent, setGeneratedContent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [viewingContent, setViewingContent] = useState(null);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [generateType, setGenerateType] = useState(null);
+  const [expandedView, setExpandedView] = useState(false);
 
   useEffect(() => {
     fetchGeneratedContent();
   }, [projectId]);
+
+  // FIX: Robust listener for generation completion
+  useEffect(() => {
+    let timeoutId;
+    // If generation just finished (isGenerating became false), fetch new data
+    // We add a small delay to ensure the DB write has propagated
+    if (!isGenerating) {
+      timeoutId = setTimeout(() => {
+        fetchGeneratedContent();
+      }, 1000);
+    }
+    return () => clearTimeout(timeoutId);
+  }, [isGenerating]);
+
 
   const fetchGeneratedContent = async () => {
     try {
@@ -29,7 +46,13 @@ const AIToolsTab = ({ projectId }) => {
   };
 
   const handleGenerate = async (type, options = {}) => {
-    setGenerating(true);
+    if (generatingRef.current) {
+      alert('Please wait for the current generation to complete');
+      return;
+    }
+
+    generatingRef.current = true;
+    setIsGenerating(true);
     setShowGenerateModal(false);
 
     try {
@@ -61,7 +84,8 @@ const AIToolsTab = ({ projectId }) => {
       console.error('Generate error:', error);
       alert(error.response?.data?.error || 'Failed to generate content');
     } finally {
-      setGenerating(false);
+      generatingRef.current = false;
+      setIsGenerating(false);
     }
   };
 
@@ -80,88 +104,80 @@ const AIToolsTab = ({ projectId }) => {
     }
   };
 
-  const handleDownload = (content) => {
-    const dataStr = JSON.stringify(content.data, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `${content.title}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
-
   // If viewing specific content
   if (viewingContent) {
     return (
       <ContentViewer 
         content={viewingContent} 
-        onBack={() => setViewingContent(null)}
+        onBack={() => {
+          setViewingContent(null);
+          setExpandedView(false);
+        }}
         onDelete={() => handleDelete(viewingContent.id)}
+        onExpand={setExpandedView}
+        expanded={expandedView}
       />
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white">
       {/* Generate Buttons */}
-      <div className="p-4 border-b space-y-2 flex-shrink-0">
+      <div className="p-4 border-b border-gray-200 space-y-2 flex-shrink-0 bg-white">
         <button
           onClick={() => {
-            setGenerateType('quiz');
-            setShowGenerateModal(true);
+            if (!isGenerating) {
+              setGenerateType('quiz');
+              setShowGenerateModal(true);
+            }
           }}
-          disabled={generating}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+          disabled={isGenerating}
+          className="w-full flex items-center gap-3 px-4 py-3 bg-[#A167A5] text-white rounded-xl hover:bg-[#854F89] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          <BookOpen className="h-5 w-5" />
-          <span className="font-medium">Generate Quiz</span>
+          <BrainCircuit className="h-5 w-5" />
+          <span>Generate Quiz</span>
         </button>
 
         <button
           onClick={() => {
-            setGenerateType('flashcards');
-            setShowGenerateModal(true);
+            if (!isGenerating) {
+              setGenerateType('flashcards');
+              setShowGenerateModal(true);
+            }
           }}
-          disabled={generating}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
+          disabled={isGenerating}
+          className="w-full flex items-center gap-3 px-4 py-3 bg-violet-700 text-white rounded-xl hover:bg-violet-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
-          <GraduationCap className="h-5 w-5" />
-          <span className="font-medium">Generate Flashcards</span>
+          <Layers className="h-5 w-5" />
+          <span>Generate Flashcards</span>
         </button>
 
         <button
           onClick={() => {
-            setGenerateType('summary');
-            setShowGenerateModal(true);
+            if (!isGenerating) {
+              setGenerateType('summary');
+              setShowGenerateModal(true);
+            }
           }}
-          disabled={generating}
-          className="w-full flex items-center gap-3 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+          disabled={isGenerating}
+          className="w-full flex items-center gap-3 px-4 py-3 bg-purple-700 text-white rounded-xl hover:bg-purple-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
         >
           <FileText className="h-5 w-5" />
-          <span className="font-medium">Generate Summary</span>
+          <span>Generate Summary</span>
         </button>
-
-        {generating && (
-          <div className="flex items-center justify-center gap-2 py-2 text-sm text-gray-600">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Generating with AI...
-          </div>
-        )}
       </div>
 
       {/* Generated Content List */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
           </div>
         ) : generatedContent.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-400">
             <Sparkles className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-sm">No generated content yet</p>
-            <p className="text-xs mt-2">Upload sources and generate content!</p>
+            <p className="text-sm font-medium">No generated content yet</p>
+            <p className="text-xs mt-1">Upload sources and generate content!</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -171,7 +187,6 @@ const AIToolsTab = ({ projectId }) => {
                 content={content}
                 onView={() => setViewingContent(content)}
                 onDelete={() => handleDelete(content.id)}
-                onDownload={() => handleDownload(content)}
               />
             ))}
           </div>
@@ -179,7 +194,7 @@ const AIToolsTab = ({ projectId }) => {
       </div>
 
       {/* Generate Options Modal */}
-      {showGenerateModal && (
+      {showGenerateModal && !isGenerating && (
         <GenerateModal
           type={generateType}
           onClose={() => setShowGenerateModal(false)}
@@ -191,12 +206,12 @@ const AIToolsTab = ({ projectId }) => {
 };
 
 // Content Card Component
-const ContentCard = ({ content, onView, onDelete, onDownload }) => {
+const ContentCard = ({ content, onView, onDelete }) => {
   const getIcon = () => {
     switch(content.content_type) {
-      case 'quiz': return <BookOpen className="h-5 w-5 text-green-600" />;
-      case 'flashcards': return <GraduationCap className="h-5 w-5 text-purple-600" />;
-      case 'summary': return <FileText className="h-5 w-5 text-blue-600" />;
+      case 'quiz': return <BrainCircuit className="h-5 w-5 text-[#A167A5]" />;
+      case 'flashcards': return <Layers className="h-5 w-5 text-violet-800" />;
+      case 'summary': return <FileText className="h-5 w-5 text-purple-800" />;
       default: return <Sparkles className="h-5 w-5 text-gray-600" />;
     }
   };
@@ -210,44 +225,38 @@ const ContentCard = ({ content, onView, onDelete, onDownload }) => {
     }
     return '';
   };
+  const count = getCount();
 
   return (
-    <div className="border border-gray-200 rounded-lg p-3 hover:shadow-md transition group">
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex items-start gap-2 flex-1 min-w-0">
-          {getIcon()}
-          <div className="flex-1 min-w-0">
+    <div 
+      onClick={onView}
+      className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all group cursor-pointer relative"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="p-2 bg-gray-50 rounded-lg">
+            {getIcon()}
+          </div>
+          <div className="flex-1 min-w-0 pt-0.5">
             <h3 className="font-medium text-sm text-gray-800 truncate">
               {content.title}
             </h3>
-            <p className="text-xs text-gray-500 capitalize">
-              {content.content_type} • {getCount()}
+            <p className="text-xs text-gray-500 capitalize mt-0.5">
+              {content.content_type}{count && ` • ${count}`}
             </p>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-1">
+        {/* Trash Button - Only visible on hover, Red only on hover */}
         <button
-          onClick={onView}
-          className="flex-1 px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded transition flex items-center justify-center gap-1"
-        >
-          <Eye className="h-3 w-3" />
-          View
-        </button>
-        <button
-          onClick={onDownload}
-          className="px-3 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
-          title="Download JSON"
-        >
-          <Download className="h-3 w-3" />
-        </button>
-        <button
-          onClick={onDelete}
-          className="px-3 py-1.5 text-xs text-red-600 bg-red-50 hover:bg-red-100 rounded transition"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition opacity-0 group-hover:opacity-100"
           title="Delete"
         >
-          <Trash2 className="h-3 w-3" />
+          <Trash2 className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -262,11 +271,9 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     const options = { title };
     if (type === 'quiz') options.numQuestions = numQuestions;
     if (type === 'flashcards') options.numCards = numCards;
-    
     onGenerate(options);
   };
 
@@ -285,21 +292,17 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-800">{getTitle()}</h2>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded transition"
-          >
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-900">{getTitle()}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition text-gray-400 hover:text-gray-600">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Title */}
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Title (Optional)
@@ -309,11 +312,10 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={`${type.charAt(0).toUpperCase() + type.slice(1)} - ${new Date().toLocaleDateString()}`}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 font-medium"
             />
           </div>
 
-          {/* Number of Questions (Quiz only) */}
           {type === 'quiz' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -322,7 +324,7 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
               <select
                 value={numQuestions}
                 onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 font-medium"
               >
                 <option value={5}>5 Questions</option>
                 <option value={10}>10 Questions</option>
@@ -332,7 +334,6 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
             </div>
           )}
 
-          {/* Number of Cards (Flashcards only) */}
           {type === 'flashcards' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -341,7 +342,7 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
               <select
                 value={numCards}
                 onChange={(e) => setNumCards(parseInt(e.target.value))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 font-medium"
               >
                 <option value={10}>10 Cards</option>
                 <option value={20}>20 Cards</option>
@@ -355,13 +356,13 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="flex-1 bg-blue-600 text-white px-4 py-2.5 font-medium rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20"
             >
               Generate
             </button>
@@ -372,68 +373,370 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
   );
 };
 
-// Content Viewer Component
-const ContentViewer = ({ content, onBack, onDelete }) => {
-  const renderContent = () => {
-    const data = content.data;
+const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isChecked, setIsChecked] = useState(false);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [showResults, setShowResults] = useState(false);
 
-    if (content.content_type === 'quiz') {
-      return (
-        <div className="space-y-6">
-          {data.questions?.map((q, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-800 mb-3">
-                {index + 1}. {q.question}
-              </h3>
-              <div className="space-y-2 mb-3">
-                {q.options?.map((option, i) => (
-                  <div
-                    key={i}
-                    className={`p-2 rounded ${
-                      i === q.correctAnswer
-                        ? 'bg-green-100 border border-green-400'
-                        : 'bg-gray-50'
-                    }`}
-                  >
-                    {option}
+  const isQuiz = content.content_type === 'quiz';
+  const isFlashcards = content.content_type === 'flashcards';
+  const data = content.data;
+
+  // Initialize user answers for quiz
+  useEffect(() => {
+    if (isQuiz && userAnswers.length === 0) {
+      setUserAnswers(new Array(data.questions?.length || 0).fill(null));
+    }
+  }, [isQuiz, data.questions?.length]);
+
+  const handleQuizAnswer = (answerIndex) => {
+    if (!isChecked) {
+      setSelectedAnswer(answerIndex);
+    }
+  };
+
+  const handleQuizCheck = () => {
+    if (selectedAnswer === null) return;
+    setIsChecked(true);
+    const newAnswers = [...userAnswers];
+    newAnswers[currentIndex] = selectedAnswer;
+    setUserAnswers(newAnswers);
+  };
+
+  const handleQuizNext = () => {
+    if (currentIndex < data.questions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setSelectedAnswer(userAnswers[currentIndex + 1]);
+      setIsChecked(userAnswers[currentIndex + 1] !== null);
+    } else {
+      // Show results after last question
+      setShowResults(true);
+    }
+  };
+
+  const handleQuizPrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setSelectedAnswer(userAnswers[currentIndex - 1]);
+      setIsChecked(userAnswers[currentIndex - 1] !== null);
+    }
+  };
+
+  const handleFlashcardNext = () => {
+    if (currentIndex < data.cards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handleFlashcardPrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const renderQuizResults = () => {
+    const score = userAnswers.reduce((acc, answer, idx) => {
+      return acc + (answer === data.questions[idx].correctAnswer ? 1 : 0);
+    }, 0);
+    const percentage = Math.round((score / data.questions.length) * 100);
+    const incorrect = data.questions.length - score;
+
+    return (
+      <div className="h-full flex items-center justify-center p-8 bg-gray-50">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-200">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-3xl font-bold text-white">{percentage}%</span>
+            </div>
+            
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
+            <p className="text-gray-600 mb-8">
+              You scored {score} out of {data.questions.length}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="text-3xl font-bold text-green-600 mb-1">{score}</div>
+                <div className="text-sm text-gray-600">Correct</div>
+              </div>
+              <div className="bg-red-50 rounded-lg p-4">
+                <div className="text-3xl font-bold text-red-600 mb-1">{incorrect}</div>
+                <div className="text-sm text-gray-600">Incorrect</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowResults(false);
+                setCurrentIndex(0);
+                setUserAnswers(new Array(data.questions.length).fill(null));
+                setSelectedAnswer(null);
+                setIsChecked(false);
+              }}
+              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              Review Answers
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderQuizContent = () => {
+    if (showResults) {
+      return renderQuizResults();
+    }
+
+    const question = data.questions[currentIndex];
+    const progress = ((currentIndex + 1) / data.questions.length) * 100;
+    const isCorrect = selectedAnswer === question.correctAnswer;
+
+    return (
+      <div className="h-full flex flex-col bg-white">
+        {/* Progress */}
+        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-600">
+              Question {currentIndex + 1} of {data.questions.length}
+            </span>
+            <span className="text-xs text-gray-500">
+              {userAnswers.filter(a => a !== null).length} answered
+            </span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-indigo-600 transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Question */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <h3 className="text-lg font-semibold text-gray-800 mb-6 leading-relaxed">
+            {question.question}
+          </h3>
+
+          {/* Options */}
+          <div className="space-y-3 mb-6">
+            {question.options.map((option, index) => {
+              let bgColor = 'bg-white hover:bg-gray-50';
+              let borderColor = 'border-gray-300';
+              let textColor = 'text-gray-800';
+              
+              if (isChecked) {
+                if (index === question.correctAnswer) {
+                  bgColor = 'bg-green-50';
+                  borderColor = 'border-green-500';
+                  textColor = 'text-green-900';
+                } else if (index === selectedAnswer && !isCorrect) {
+                  bgColor = 'bg-red-50';
+                  borderColor = 'border-red-500';
+                  textColor = 'text-red-900';
+                }
+              } else if (selectedAnswer === index) {
+                bgColor = 'bg-indigo-50';
+                borderColor = 'border-indigo-500';
+              }
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleQuizAnswer(index)}
+                  disabled={isChecked}
+                  className={`w-full text-left p-3 rounded-lg border-2 transition ${bgColor} ${borderColor} ${textColor} disabled:cursor-not-allowed flex items-center gap-2`}
+                >
+                  <div className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center font-semibold text-xs ${
+                    isChecked && index === question.correctAnswer 
+                      ? 'bg-green-500 text-white border-green-500' 
+                      : isChecked && index === selectedAnswer && !isCorrect
+                      ? 'bg-red-500 text-white border-red-500'
+                      : selectedAnswer === index
+                      ? 'bg-indigo-500 text-white border-indigo-500'
+                      : 'bg-white'
+                  }`}>
+                    {String.fromCharCode(65 + index)}
                   </div>
-                ))}
-              </div>
-              <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded">
-                <strong>Explanation:</strong> {q.explanation}
+                  <span className="flex-1 text-sm">{option}</span>
+                  {isChecked && index === question.correctAnswer && (
+                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                  )}
+                  {isChecked && index === selectedAnswer && !isCorrect && (
+                    <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Explanation */}
+          {isChecked && (
+            <div className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50 border-2 border-green-200' : 'bg-red-50 border-2 border-red-200'}`}>
+              <p className={`font-bold text-sm mb-2 ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+              </p>
+              <div className="text-sm text-gray-700">
+                <MarkdownRenderer content={question.explanation} />
               </div>
             </div>
-          ))}
+          )}
         </div>
-      );
-    }
 
-    if (content.content_type === 'flashcards') {
-      return (
-        <div className="space-y-4">
-          {data.cards?.map((card, index) => (
-            <div key={index} className="border border-gray-200 rounded-lg overflow-hidden">
-              <div className="bg-blue-50 p-4 border-b">
-                <div className="text-xs text-gray-500 mb-1">Front</div>
-                <div className="font-semibold text-gray-800">{card.front}</div>
+        {/* Navigation */}
+        <div className="p-4 border-t border-gray-200 flex items-center justify-between gap-2 flex-shrink-0">
+          <button
+            onClick={handleQuizPrevious}
+            disabled={currentIndex === 0}
+            className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Previous
+          </button>
+
+          {!isChecked ? (
+            <button
+              onClick={handleQuizCheck}
+              disabled={selectedAnswer === null}
+              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
+            >
+              Check Answer
+            </button>
+          ) : (
+            <button
+              onClick={handleQuizNext}
+              className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm"
+            >
+              {currentIndex === data.questions.length - 1 ? 'View Results' : 'Next Question'}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderFlashcardsContent = () => {
+    const card = data.cards[currentIndex];
+    const progress = ((currentIndex + 1) / data.cards.length) * 100;
+
+    return (
+      <div className="h-full flex flex-col bg-gray-50">
+        {/* Progress */}
+        <div className="p-4 border-b border-gray-200 flex-shrink-0 bg-white">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-600">
+              Card {currentIndex + 1} of {data.cards.length}
+            </span>
+          </div>
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-indigo-600 transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Flashcard */}
+        <div className="flex-1 flex items-center justify-center p-4 relative">
+          <button
+            onClick={handleFlashcardPrevious}
+            disabled={currentIndex === 0}
+            className="absolute left-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition z-10"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          <div 
+            className="w-full max-w-lg cursor-pointer"
+            onClick={() => setIsFlipped(!isFlipped)}
+            style={{ perspective: '1000px' }}
+          >
+            <div 
+              className="relative w-full h-[300px]"
+              style={{
+                transformStyle: 'preserve-3d',
+                transition: 'transform 0.6s',
+                transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
+              }}
+            >
+              {/* Front */}
+              <div 
+                className="absolute inset-0 w-full h-full bg-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center"
+                style={{
+                  backfaceVisibility: 'hidden',
+                  overflow: 'hidden'
+                }}
+              >
+                <div className="text-xs font-medium text-indigo-600 mb-3 uppercase tracking-wide flex-shrink-0">Question</div>
+                
+                <div className="flex-1 w-full overflow-y-auto px-2">
+                  <div className="min-h-full flex flex-col items-center justify-center">
+                    <div className="text-base font-medium text-gray-800 leading-relaxed text-center">
+                      <MarkdownRenderer content={card.front} />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-400 mt-3 flex-shrink-0">Click to reveal answer</p>
               </div>
-              <div className="bg-white p-4">
-                <div className="text-xs text-gray-500 mb-1">Back</div>
-                <div className="text-gray-700">{card.back}</div>
+              
+              {/* Back */}
+              <div 
+                className="absolute inset-0 w-full h-full bg-white border-2 border-purple-100 rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center"
+                style={{
+                  backfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg)',
+                  overflow: 'hidden'
+                }}
+              >
+                <div className="text-xs font-medium text-purple-600 mb-3 uppercase tracking-wide flex-shrink-0">Answer</div>
+                
+                <div className="flex-1 w-full overflow-y-auto px-2">
+                  <div className="min-h-full flex flex-col items-center justify-center">
+                    <div className="text-base font-medium text-gray-800 leading-relaxed text-center">
+                      <MarkdownRenderer content={card.back} />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-400 mt-3 flex-shrink-0">Click to flip back</p>
               </div>
             </div>
-          ))}
-        </div>
-      );
-    }
+          </div>
 
-    if (content.content_type === 'summary') {
-      return (
+          <button
+            onClick={handleFlashcardNext}
+            disabled={currentIndex === data.cards.length - 1}
+            className="absolute right-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition z-10"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Hint */}
+        <div className="p-4 text-center text-xs text-gray-500 flex-shrink-0">
+          Click card to flip • Use arrows to navigate
+        </div>
+      </div>
+    );
+  };
+
+  const renderSummaryContent = () => {
+    return (
+      <div className="h-full overflow-y-auto p-4 bg-white">
         <div className="space-y-6">
           {/* TL;DR */}
           <div className="bg-blue-50 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">TL;DR</h3>
-            <p className="text-gray-800">{data.tldr}</p>
+            <div className="text-gray-800">
+              <MarkdownRenderer content={data.tldr} />
+            </div>
           </div>
 
           {/* Key Points */}
@@ -445,7 +748,9 @@ const ContentViewer = ({ content, onBack, onDelete }) => {
                   <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
                     {index + 1}
                   </span>
-                  <span className="text-gray-700 pt-0.5">{point}</span>
+                  <span className="text-gray-700 pt-0.5 text-sm">
+                    <MarkdownRenderer content={point} />
+                  </span>
                 </li>
               ))}
             </ul>
@@ -454,54 +759,88 @@ const ContentViewer = ({ content, onBack, onDelete }) => {
           {/* Detailed Notes */}
           <div>
             <h3 className="text-sm font-semibold text-gray-700 mb-3">Detailed Notes</h3>
-            <div className="prose prose-sm max-w-none">
-              <p className="text-gray-700 whitespace-pre-wrap">{data.detailedNotes}</p>
+            <div className="prose prose-sm max-w-none text-gray-700">
+              <MarkdownRenderer content={data.detailedNotes} />
             </div>
           </div>
 
           {/* Simple Explanation */}
           <div className="bg-green-50 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-gray-700 mb-2">Simple Explanation (ELI5)</h3>
-            <p className="text-gray-800">{data.simpleExplanation}</p>
+            <div className="text-gray-800">
+              <MarkdownRenderer content={data.simpleExplanation} />
+            </div>
           </div>
         </div>
-      );
-    }
-
-    return <div>Unknown content type</div>;
+      </div>
+    );
   };
 
+  // Expanded view modal
+  if (expanded) {
+    return (
+      <div className="fixed inset-0 bg-white z-50 flex flex-col">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition">
+              <X className="h-5 w-5" />
+            </button>
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">{content.title}</h2>
+              <p className="text-sm text-gray-500 capitalize">
+                {content.content_type} • {new Date(content.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => onExpand(false)} className="p-2 hover:bg-gray-100 rounded-lg transition" title="Minimize">
+              <Minimize2 className="h-5 w-5" />
+            </button>
+            <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-hidden">
+          {isQuiz ? renderQuizContent() : isFlashcards ? renderFlashcardsContent() : renderSummaryContent()}
+        </div>
+      </div>
+    );
+  }
+
+  // Panel view
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white">
       {/* Header */}
-      <div className="p-4 border-b flex items-center justify-between flex-shrink-0">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-        >
+      <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+        <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition font-medium">
           <X className="h-5 w-5" />
-          <span className="font-medium">Close</span>
+          <span className="text-sm">Close</span>
         </button>
-        <button
-          onClick={onDelete}
-          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-          title="Delete"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => onExpand(true)} className="p-2 hover:bg-gray-100 rounded-lg transition" title="Expand">
+            <Maximize2 className="h-4 w-4" />
+          </button>
+          <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       {/* Title */}
-      <div className="px-4 pt-4 flex-shrink-0">
-        <h2 className="text-xl font-bold text-gray-800">{content.title}</h2>
-        <p className="text-sm text-gray-500 mt-1 capitalize">
-          {content.content_type} • {new Date(content.created_at).toLocaleDateString()}
+      <div className="px-4 pt-3 flex-shrink-0">
+        <h2 className="text-lg font-bold text-gray-800 truncate">{content.title}</h2>
+        <p className="text-xs text-gray-500 capitalize mt-0.5">
+          {content.content_type}
         </p>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {renderContent()}
+      <div className="flex-1 overflow-hidden">
+        {isQuiz ? renderQuizContent() : isFlashcards ? renderFlashcardsContent() : renderSummaryContent()}
       </div>
     </div>
   );

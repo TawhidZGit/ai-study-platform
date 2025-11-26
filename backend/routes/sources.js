@@ -4,6 +4,7 @@ const upload = require('../config/upload');
 const authenticateToken = require('../middleware/auth');
 const fs = require('fs').promises;
 const pdfParse = require('pdf-parse');
+const { deleteUploadedFile } = require('../utils/fileCleanup');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -71,12 +72,16 @@ router.get('/:id', async (req, res) => {
 
 // Upload source
 router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'), async (req, res) => {
+  let uploadedFilePath = null;
+  
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
     const { originalname, path: filepath } = req.file;
+    uploadedFilePath = filepath;
+    
     let content = '';
     let fileType = 'txt';
 
@@ -92,6 +97,10 @@ router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'),
     }
 
     if (!content || content.trim().length === 0) {
+      // Clean up the uploaded file
+      if (uploadedFilePath) {
+        await fs.unlink(uploadedFilePath).catch(console.error);
+      }
       return res.status(400).json({ error: 'Could not extract text from file' });
     }
 
@@ -111,8 +120,17 @@ router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'),
       [req.params.projectId]
     );
 
+    // Note: We keep the uploaded file for now (might be used for PDF viewing later)
+    // If you want to delete it after extraction, uncomment:
+    // await fs.unlink(uploadedFilePath).catch(console.error);
+
     res.json({ source: result.rows[0] });
   } catch (error) {
+    // Clean up uploaded file on error
+    if (uploadedFilePath) {
+      await fs.unlink(uploadedFilePath).catch(console.error);
+    }
+    
     console.error('Upload source error:', error);
     res.status(500).json({ error: 'Failed to upload source' });
   }
@@ -121,17 +139,30 @@ router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'),
 // Delete source
 router.delete('/:id', async (req, res) => {
   try {
-    const result = await pool.query(
-      `DELETE FROM sources 
-       WHERE id = $1 
-       AND project_id IN (SELECT id FROM projects WHERE user_id = $2)
-       RETURNING *`,
-      [req.params.id, req.user.id]
+    // Get the source info before deleting
+    const sourceResult = await pool.query(
+      `SELECT s.filename, s.project_id, p.user_id 
+       FROM sources s
+       JOIN projects p ON s.project_id = p.id
+       WHERE s.id = $1`,
+      [req.params.id]
     );
 
-    if (result.rows.length === 0) {
+    if (sourceResult.rows.length === 0) {
       return res.status(404).json({ error: 'Source not found' });
     }
+
+    const source = sourceResult.rows[0];
+
+    if (source.user_id !== req.user.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Delete from database
+    await pool.query('DELETE FROM sources WHERE id = $1', [req.params.id]);
+
+    // Try to delete the physical file
+    await deleteUploadedFile(source.filename);
 
     res.json({ message: 'Source deleted successfully' });
   } catch (error) {

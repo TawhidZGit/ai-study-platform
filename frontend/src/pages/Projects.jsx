@@ -1,18 +1,58 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Plus, FolderOpen, FileText, StickyNote, Loader2, Trash2, Settings } from 'lucide-react';
+import { 
+  Plus, FolderOpen, FileText, StickyNote, Loader2, 
+  Trash2, Settings, Edit2, ChevronDown, 
+  Calendar, ArrowUpNarrowWide, ArrowDownNarrowWide, Type, Clock,
+  Search, LayoutGrid, List as ListIcon, X
+} from 'lucide-react';
 
 const Projects = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // Data State
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  
+  // UI State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  
+  // Modals state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [projectToEdit, setProjectToEdit] = useState(null);
+
+  // Filter state
+  const [sortBy, setSortBy] = useState('updated'); 
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterRef = useRef(null);
+
+  // Filter Options Definition
+  const sortOptions = [
+    { id: 'updated', label: 'Last Updated', icon: Calendar },
+    { id: 'newest', label: 'Newest Created', icon: ArrowDownNarrowWide },
+    { id: 'oldest', label: 'Oldest Created', icon: ArrowUpNarrowWide },
+    { id: 'name', label: 'Name (A-Z)', icon: Type },
+  ];
+
+  const currentSort = sortOptions.find(o => o.id === sortBy);
 
   useEffect(() => {
     fetchProjects();
+  }, []);
+
+  // Close filter dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (filterRef.current && !filterRef.current.contains(event.target)) {
+        setIsFilterOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchProjects = async () => {
@@ -31,28 +71,107 @@ const Projects = () => {
     navigate('/login');
   };
 
+  // 1. Filter by Search Query
+  const filteredProjects = useMemo(() => {
+    return projects.filter(p => 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+  }, [projects, searchQuery]);
+
+  // 2. Sort the Filtered Results
+  const sortedProjects = useMemo(() => {
+    return [...filteredProjects].sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name);
+        case 'newest':
+          return new Date(b.created_at) - new Date(a.created_at);
+        case 'oldest':
+          return new Date(a.created_at) - new Date(b.created_at);
+        case 'updated':
+        default:
+          return new Date(b.updated_at) - new Date(a.updated_at);
+      }
+    });
+  }, [filteredProjects, sortBy]);
+
+  // Handle Create/Edit Open
+  const openCreateModal = () => {
+    setProjectToEdit(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (project) => {
+    setProjectToEdit(project);
+    setIsModalOpen(true);
+  };
+
+  // Handle Modal Submit
+  const handleProjectSaved = (savedProject, isEdit) => {
+    if (isEdit) {
+      setProjects(prev => prev.map(p => {
+        if (p.id === savedProject.id) {
+          return {
+            ...savedProject,
+            source_count: p.source_count || 0,
+            note_count: p.note_count || 0
+          };
+        }
+        return p;
+      }));
+    } else {
+      const newProject = { ...savedProject, source_count: 0, note_count: 0 };
+      setProjects(prev => [newProject, ...prev]);
+      navigate(`/workspace/${savedProject.id}`);
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (!confirm('Are you sure? This will delete all sources, notes, and chat history.')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/projects/${projectId}`);
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Failed to delete project');
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">AI Study Platform</h1>
-            <p className="text-sm text-gray-600">Your Learning Workspace</p>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700">
+      
+      {/* Header - Glassmorphism Style */}
+      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 supports-[backdrop-filter]:bg-white/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+              <FolderOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 leading-none">AI Study Platform</h1>
+              <p className="text-xs font-medium text-slate-500 mt-1">Workspace</p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-gray-600">Welcome, {user?.name}!</span>
+            <div className="hidden sm:flex flex-col items-end mr-2">
+              <span className="text-sm font-semibold text-slate-700">{user?.name}</span>
+            </div>
             <button
               onClick={handleLogout}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+              className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl hover:bg-slate-50 hover:text-rose-600 hover:border-rose-100 transition-all text-sm font-medium shadow-sm"
             >
               Logout
             </button>
@@ -61,197 +180,444 @@ const Projects = () => {
       </nav>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        {/* Page Title & Actions */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800">My Projects</h2>
-            <p className="text-gray-600 mt-1">Organize your study materials into projects</p>
+            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">My Projects</h2>
+            <p className="text-slate-500 mt-2 text-lg">Manage your research, notes, and AI conversations.</p>
           </div>
+          
           <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition shadow-md"
+            onClick={openCreateModal}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200 font-medium"
           >
             <Plus className="h-5 w-5" />
-            New Project
+            <span>Create Project</span>
           </button>
         </div>
 
-        {/* Projects Grid */}
-        {projects.length === 0 ? (
-          <div className="text-center py-16">
-            <FolderOpen className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">No projects yet</h3>
-            <p className="text-gray-600 mb-6">Create your first project to get started!</p>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
-            >
-              <Plus className="h-5 w-5" />
-              Create First Project
-            </button>
+        {/* Filters Toolbar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+          {/* Functional Search Bar */}
+          <div className="relative flex-1 w-full sm:max-w-xs ml-2">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input 
+              type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search projects..." 
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-lg text-sm transition-all outline-none"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto pr-2">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide px-2 hidden sm:block">Sort By</span>
+            
+            {/* Aesthetic Filter Dropdown */}
+            <div className="relative flex-1 sm:flex-none" ref={filterRef}>
+              <button
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="w-full sm:w-auto flex items-center justify-between gap-3 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-indigo-300 hover:text-indigo-600 transition-all text-sm font-medium text-slate-600 shadow-sm"
+              >
+                <div className="flex items-center gap-2">
+                  {currentSort && <currentSort.icon className="h-4 w-4" />}
+                  <span>{currentSort?.label}</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {isFilterOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-20 animate-in fade-in zoom-in-95 duration-100">
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.id}
+                      onClick={() => {
+                        setSortBy(option.id);
+                        setIsFilterOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-50 transition ${
+                        sortBy === option.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'
+                      }`}
+                    >
+                      <option.icon className={`h-4 w-4 ${sortBy === option.id ? 'text-indigo-600' : 'text-slate-400'}`} />
+                      <span className="flex-1 font-medium">{option.label}</span>
+                      {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div className="h-6 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+            
+            {/* Functional View Toggle */}
+            <div className="flex bg-slate-100 p-1 rounded-lg hidden sm:flex">
+              <button 
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded shadow-sm transition-all ${
+                  viewMode === 'grid' 
+                    ? 'bg-white text-indigo-600' 
+                    : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+              <button 
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded shadow-sm transition-all ${
+                  viewMode === 'list' 
+                    ? 'bg-white text-indigo-600' 
+                    : 'text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                <ListIcon className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Projects Display Logic (Grid vs List) */}
+        {sortedProjects.length === 0 ? (
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+            {searchQuery ? (
+               // No results found for search
+               <>
+                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                   <Search className="h-8 w-8 text-slate-400" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-1">No matches found</h3>
+                <p className="text-slate-500">Try adjusting your search terms</p>
+               </>
+            ) : (
+               // No projects at all
+               <>
+                <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                  <FolderOpen className="h-10 w-10 text-indigo-500" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">No projects yet</h3>
+                <p className="text-slate-500 mb-8 max-w-sm mx-auto">
+                  Create your first project to start organizing your notes, PDFs, and AI chats.
+                </p>
+                <button
+                  onClick={openCreateModal}
+                  className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl hover:bg-indigo-700 transition font-medium shadow-lg shadow-indigo-500/30"
+                >
+                  <Plus className="h-5 w-5" />
+                  Create First Project
+                </button>
+               </>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onOpen={() => navigate(`/workspace/${project.id}`)}
-                onDelete={() => handleDeleteProject(project.id)}
-                onRefresh={fetchProjects}
-              />
-            ))}
-          </div>
+          viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  onOpen={() => navigate(`/workspace/${project.id}`)}
+                  onEdit={() => openEditModal(project)}
+                  onDelete={() => handleDeleteProject(project.id)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col space-y-3">
+               {sortedProjects.map((project) => (
+                <ProjectRow
+                  key={project.id}
+                  project={project}
+                  onOpen={() => navigate(`/workspace/${project.id}`)}
+                  onEdit={() => openEditModal(project)}
+                  onDelete={() => handleDeleteProject(project.id)}
+                />
+              ))}
+            </div>
+          )
         )}
       </div>
 
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <CreateProjectModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={(project) => {
-            setShowCreateModal(false);
-            navigate(`/workspace/${project.id}`);
-          }}
+      {/* Reusable Create/Edit Project Modal */}
+      {isModalOpen && (
+        <ProjectModal
+          project={projectToEdit}
+          onClose={() => setIsModalOpen(false)}
+          onSaved={handleProjectSaved}
         />
       )}
     </div>
   );
-
-  async function handleDeleteProject(projectId) {
-    if (!confirm('Are you sure? This will delete all sources, notes, and chat history.')) {
-      return;
-    }
-
-    try {
-      await api.delete(`/projects/${projectId}`);
-      fetchProjects();
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      alert('Failed to delete project');
-    }
-  }
 };
 
-// Project Card Component
-const ProjectCard = ({ project, onOpen, onDelete, onRefresh }) => {
+// ----------------------------------------------------------------------
+// HELPER: Format Time
+// ----------------------------------------------------------------------
+const formatTimeAgo = (dateString) => {
+    if (!dateString) return 'Never';
+    const getDiff = (d) => Math.floor((new Date() - d) / 1000);
+
+    let dateStr = dateString.replace(' ', 'T');
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
+    let date = new Date(dateStr);
+    let diff = getDiff(date);
+
+    if (diff < -60) {
+      date = new Date(dateString); 
+      diff = getDiff(date);
+    }
+
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+    
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+};
+
+// HELPER: Pluralize (FIXED: Forces number conversion)
+const pluralize = (count, noun) => {
+    // Force count to be a number, default to 0
+    const num = Number(count) || 0;
+    return `${num} ${noun}${num === 1 ? '' : 's'}`;
+};
+
+// ----------------------------------------------------------------------
+// COMPONENT: Grid View Card
+// ----------------------------------------------------------------------
+const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    if (showMenu) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMenu]);
 
   return (
     <div
-      className="bg-white rounded-lg shadow-md hover:shadow-lg transition cursor-pointer group relative"
+      className="group relative bg-white rounded-2xl border border-slate-200 p-6 transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 cursor-pointer flex flex-col h-full"
       onClick={onOpen}
     >
-      {/* Color Bar */}
-      <div
-        className="h-2 rounded-t-lg"
-        style={{ backgroundColor: project.color }}
-      />
-
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <h3 className="text-xl font-semibold text-gray-800 mb-1 group-hover:text-blue-600 transition">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-center gap-4">
+          <div 
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105"
+            style={{ backgroundColor: project.color || '#4F46E5' }} 
+          >
+            <FolderOpen className="h-6 w-6" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">
               {project.name}
             </h3>
-            {project.description && (
-              <p className="text-sm text-gray-600 line-clamp-2">{project.description}</p>
-            )}
+            <p className="text-xs font-medium text-slate-400 flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {formatTimeAgo(project.updated_at)}
+            </p>
           </div>
+        </div>
+
+        <div className="relative" ref={menuRef}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-2 hover:bg-gray-100 rounded-lg transition"
+            className={`p-2 rounded-full transition-colors ${showMenu ? 'bg-indigo-50 text-indigo-600' : 'text-slate-300 hover:bg-slate-50 hover:text-slate-600'}`}
           >
-            <Settings className="h-5 w-5 text-gray-500" />
+            <Settings className="h-5 w-5" />
           </button>
-        </div>
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <div className="flex items-center gap-1">
-            <FileText className="h-4 w-4" />
-            <span>{project.source_count || 0} sources</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <StickyNote className="h-4 w-4" />
-            <span>{project.note_count || 0} notes</span>
-          </div>
-        </div>
-
-        {/* Last Updated */}
-        <div className="mt-4 pt-4 border-t text-xs text-gray-500">
-          Updated {new Date(project.updated_at).toLocaleDateString()}
+          {showMenu && (
+            <div
+              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1 origin-top-right animate-in fade-in zoom-in-95 duration-100"
+              style={{ transform: 'translateX(-10px)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-50 mb-1">
+                Actions
+              </div>
+              <button
+                onClick={() => { setShowMenu(false); onEdit(); }}
+                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2 transition-colors"
+              >
+                <Edit2 className="h-4 w-4" />
+                Edit Details
+              </button>
+              <button
+                onClick={() => { setShowMenu(false); onDelete(); }}
+                className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Project
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Dropdown Menu */}
-      {showMenu && (
-        <div
-          className="absolute right-4 top-16 bg-white rounded-lg shadow-lg border z-10 py-1 w-48"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-              setShowMenu(false);
-            }}
-            className="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 flex items-center gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete Project
-          </button>
+      <div className="flex-1 mb-6">
+        {project.description ? (
+          <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
+            {project.description}
+          </p>
+        ) : (
+          <p className="text-sm text-slate-300 italic">No description added.</p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-100">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-semibold text-slate-600 border border-slate-100 group-hover:bg-white group-hover:border-indigo-100 transition-colors">
+          <FileText className="h-3.5 w-3.5 text-indigo-500" />
+          <span>{pluralize(project.source_count, 'Source')}</span>
         </div>
-      )}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-semibold text-slate-600 border border-slate-100 group-hover:bg-white group-hover:border-indigo-100 transition-colors">
+          <StickyNote className="h-3.5 w-3.5 text-violet-500" />
+          <span>{pluralize(project.note_count, 'Note')}</span>
+        </div>
+      </div>
     </div>
   );
 };
 
-// Create Project Modal Component
-const CreateProjectModal = ({ onClose, onCreated }) => {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#3B82F6');
+// ----------------------------------------------------------------------
+// COMPONENT: List View Row (New!)
+// ----------------------------------------------------------------------
+const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
+    const [showMenu, setShowMenu] = useState(false);
+    const menuRef = useRef(null);
+  
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        if (menuRef.current && !menuRef.current.contains(event.target)) {
+          setShowMenu(false);
+        }
+      };
+      if (showMenu) document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [showMenu]);
+
+    return (
+        <div 
+            onClick={onOpen}
+            className="group flex items-center p-4 bg-white border border-slate-200 rounded-xl hover:border-indigo-300 hover:shadow-sm cursor-pointer transition-all"
+        >
+            {/* Icon */}
+            <div 
+                className="w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0 mr-4"
+                style={{ backgroundColor: project.color || '#4F46E5' }} 
+            >
+                <FolderOpen className="h-5 w-5" />
+            </div>
+
+            {/* Title & Desc */}
+            <div className="flex-1 min-w-0 mr-4">
+                <h3 className="text-base font-bold text-slate-800 group-hover:text-indigo-600 truncate">
+                    {project.name}
+                </h3>
+                <p className="text-sm text-slate-500 truncate">
+                    {project.description || <span className="text-slate-300 italic">No description</span>}
+                </p>
+            </div>
+
+            {/* Counts */}
+            <div className="hidden sm:flex items-center gap-3 mr-6">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 w-20">
+                    <FileText className="h-3.5 w-3.5" />
+                    {pluralize(project.source_count, 'Source')}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 w-20">
+                    <StickyNote className="h-3.5 w-3.5" />
+                    {pluralize(project.note_count, 'Note')}
+                </div>
+            </div>
+
+            {/* Date */}
+            <div className="hidden md:flex flex-col items-end mr-4 min-w-[80px]">
+                <span className="text-xs text-slate-400">Updated</span>
+                <span className="text-xs font-medium text-slate-600">{formatTimeAgo(project.updated_at)}</span>
+            </div>
+
+            {/* Settings */}
+            <div className="relative" ref={menuRef}>
+                <button
+                    onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(!showMenu);
+                    }}
+                    className="p-2 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                >
+                    <Settings className="h-5 w-5" />
+                </button>
+
+                 {showMenu && (
+                    <div
+                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1 origin-top-right"
+                    onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => { setShowMenu(false); onEdit(); }}
+                            className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2"
+                        >
+                            <Edit2 className="h-4 w-4" />
+                            Edit Details
+                        </button>
+                        <button
+                            onClick={() => { setShowMenu(false); onDelete(); }}
+                            className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Project
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// ----------------------------------------------------------------------
+// COMPONENT: Project Modal
+// ----------------------------------------------------------------------
+const ProjectModal = ({ project, onClose, onSaved }) => {
+  const isEditMode = !!project;
+  
+  const [name, setName] = useState(project?.name || '');
+  const [description, setDescription] = useState(project?.description || '');
+  const [color, setColor] = useState(project?.color || '#4F46E5');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const colors = [
-    '#3B82F6', // Blue
-    '#10B981', // Green
-    '#F59E0B', // Orange
-    '#EF4444', // Red
-    '#8B5CF6', // Purple
-    '#EC4899', // Pink
-    '#6366F1', // Indigo
-    '#14B8A6', // Teal
+    '#4F46E5', '#8B5CF6', '#EC4899', '#F43F5E', 
+    '#F59E0B', '#10B981', '#0EA5E9', '#64748B'
   ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!name.trim()) {
-      setError('Project name is required');
-      return;
-    }
-
+    if (!name.trim()) { setError('Project name is required'); return; }
     setLoading(true);
 
     try {
-      const response = await api.post('/projects', {
-        name: name.trim(),
-        description: description.trim(),
-        color
-      });
-
-      onCreated(response.data.project);
+      let response;
+      const payload = { name: name.trim(), description: description.trim(), color };
+      if (isEditMode) {
+        response = await api.put(`/projects/${project.id}`, payload);
+      } else {
+        response = await api.post('/projects', payload);
+      }
+      onSaved(response.data.project, isEditMode);
     } catch (error) {
-      console.error('Create project error:', error);
-      setError(error.response?.data?.error || 'Failed to create project');
+      console.error('Project save error:', error);
+      setError(error.response?.data?.error || 'Failed to save project');
     } finally {
       setLoading(false);
     }
@@ -259,86 +625,91 @@ const CreateProjectModal = ({ onClose, onCreated }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200 border border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Create New Project</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Project Name *
-            </label>
+            <h2 className="text-2xl font-bold text-slate-900">
+              {isEditMode ? 'Edit Project' : 'Create Project'}
+            </h2>
+            <p className="text-slate-500 text-sm mt-1">Configure your workspace details.</p>
+          </div>
+          {/* Replaced Arrow/Chevron with X icon */}
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition text-slate-400 hover:text-slate-600">
+             <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Project Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Biology 101, History Final Prep"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="e.g., Biology 101"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 font-medium placeholder:text-slate-400"
               autoFocus
             />
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description (Optional)
-            </label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Brief description of this project..."
+              placeholder="What are you studying?"
               rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 resize-none placeholder:text-slate-400"
             />
           </div>
 
-          {/* Color Picker */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Color Theme
-            </label>
-            <div className="flex gap-2 flex-wrap">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Theme Color</label>
+            <div className="flex gap-3 flex-wrap">
               {colors.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-10 h-10 rounded-lg transition ${
-                    color === c ? 'ring-2 ring-offset-2 ring-gray-400' : ''
+                  className={`w-9 h-9 rounded-full transition-all duration-200 shadow-sm ${
+                    color === c 
+                      ? 'ring-2 ring-offset-2 ring-indigo-500 scale-110' 
+                      : 'hover:scale-110 hover:shadow-md'
                   }`}
                   style={{ backgroundColor: c }}
+                  title={c}
                 />
               ))}
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
+            <div className="bg-rose-50 text-rose-600 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-rose-600 rounded-full" />
               {error}
             </div>
           )}
 
-          {/* Buttons */}
           <div className="flex gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+              className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              className="flex-1 bg-indigo-600 text-white px-4 py-3 font-semibold rounded-xl hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
             >
-              {loading ? 'Creating...' : 'Create Project'}
+              {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Project')}
             </button>
           </div>
         </form>

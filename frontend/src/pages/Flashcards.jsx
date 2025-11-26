@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Loader2, RotateCw, TrendingUp } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Loader2, TrendingUp } from 'lucide-react';
 
 const Flashcards = () => {
   const { id, documentId } = useParams();
@@ -65,8 +65,6 @@ const Flashcards = () => {
         numCards: 20
       });
       setFlashcardSet(response.data.flashcardSet);
-      
-      // Redirect to the study page
       navigate(`/flashcards/${response.data.flashcardSet.id}`);
     } catch (error) {
       console.error('Error generating flashcards:', error);
@@ -74,6 +72,24 @@ const Flashcards = () => {
     } finally {
       setGenerating(false);
       setLoading(false);
+    }
+  };
+
+  const handleFlip = () => {
+    setIsFlipped(!isFlipped);
+  };
+
+  const handleNext = () => {
+    if (currentCardIndex < dueCards.length - 1) {
+      setCurrentCardIndex(currentCardIndex + 1);
+      setIsFlipped(false);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentCardIndex > 0) {
+      setCurrentCardIndex(currentCardIndex - 1);
+      setIsFlipped(false);
     }
   };
 
@@ -86,12 +102,9 @@ const Flashcards = () => {
         difficulty
       });
 
-      // Move to next card
       if (currentCardIndex < dueCards.length - 1) {
-        setCurrentCardIndex(currentCardIndex + 1);
-        setIsFlipped(false);
+        handleNext();
       } else {
-        // Finished all cards
         await fetchStats();
         setShowStats(true);
       }
@@ -103,10 +116,10 @@ const Flashcards = () => {
 
   if (generating) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Generating flashcards with AI...</p>
+          <p className="text-gray-600 font-medium">Generating flashcards with AI...</p>
           <p className="text-sm text-gray-500 mt-2">This may take 10-30 seconds</p>
         </div>
       </div>
@@ -115,7 +128,7 @@ const Flashcards = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
@@ -123,8 +136,16 @@ const Flashcards = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600">{error}</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <p className="text-red-600 text-lg mb-4">{error}</p>
+          <button
+            onClick={() => navigate('/documents')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Back to Documents
+          </button>
+        </div>
       </div>
     );
   }
@@ -186,8 +207,8 @@ const Flashcards = () => {
   const progress = ((currentCardIndex + 1) / dueCards.length) * 100;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-8">
+      <div className="max-w-4xl mx-auto px-4">
         <button
           onClick={() => navigate('/documents')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-6"
@@ -199,11 +220,11 @@ const Flashcards = () => {
         {/* Header */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">{flashcardSet.filename}</h1>
-          <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
             <span>Card {currentCardIndex + 1} of {dueCards.length}</span>
             <span>Reviewed: {currentCard.timesReviewed} times</span>
           </div>
-          <div className="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
             <div 
               className="h-full bg-blue-600 transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -211,91 +232,116 @@ const Flashcards = () => {
           </div>
         </div>
 
-        {/* Flashcard */}
-        <div 
-          className="relative h-96 mb-6 cursor-pointer perspective"
-          onClick={() => setIsFlipped(!isFlipped)}
-        >
-          <div className={`flashcard ${isFlipped ? 'flipped' : ''}`}>
+        {/* Flashcard Container */}
+        <div className="relative mb-8" style={{ perspective: '1000px', minHeight: '400px' }}>
+          {/* Navigation Arrows */}
+          <button
+            onClick={handlePrevious}
+            disabled={currentCardIndex === 0}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition z-10"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+
+          {/* Flashcard */}
+          <div 
+            className="flashcard-container cursor-pointer"
+            onClick={handleFlip}
+            style={{
+              transformStyle: 'preserve-3d',
+              transition: 'transform 0.6s',
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+              minHeight: '400px'
+            }}
+          >
             {/* Front */}
-            <div className="flashcard-face flashcard-front">
-              <div className="bg-white rounded-lg shadow-xl p-8 h-full flex flex-col items-center justify-center">
-                <p className="text-xl text-gray-800 text-center">{currentCard.front}</p>
-                <p className="text-sm text-gray-500 mt-6">Click to reveal answer</p>
-              </div>
+            <div 
+              className="flashcard-face bg-white rounded-2xl shadow-2xl p-12 flex flex-col items-center justify-center text-center"
+              style={{
+                backfaceVisibility: 'hidden',
+                position: 'absolute',
+                width: '100%',
+                minHeight: '400px'
+              }}
+            >
+              <div className="text-sm font-medium text-blue-600 mb-6 uppercase tracking-wide">Question</div>
+              <p className="text-2xl text-gray-800 font-medium leading-relaxed mb-8">{currentCard.front}</p>
+              <p className="text-sm text-gray-400 mt-auto">Click to reveal answer</p>
             </div>
             
             {/* Back */}
-            <div className="flashcard-face flashcard-back">
-              <div className="bg-blue-600 rounded-lg shadow-xl p-8 h-full flex flex-col items-center justify-center">
-                <p className="text-xl text-white text-center">{currentCard.back}</p>
-                <p className="text-sm text-blue-200 mt-6">Click to flip back</p>
-              </div>
+            <div 
+              className="flashcard-face bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-2xl p-12 flex flex-col items-center justify-center text-center"
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)',
+                position: 'absolute',
+                width: '100%',
+                minHeight: '400px'
+              }}
+            >
+              <div className="text-sm font-medium text-blue-200 mb-6 uppercase tracking-wide">Answer</div>
+              <p className="text-2xl text-white font-medium leading-relaxed mb-8">{currentCard.back}</p>
+              <p className="text-sm text-blue-200 mt-auto">Click to flip back</p>
             </div>
           </div>
+
+          <button
+            onClick={handleNext}
+            disabled={currentCardIndex === dueCards.length - 1}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition z-10"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
         </div>
 
         {/* Review Buttons */}
         {isFlipped && (
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-3 animate-fade-in">
             <button
-              onClick={(e) => { e.stopPropagation(); handleReview('again'); }}
-              className="py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+              onClick={() => handleReview('again')}
+              className="py-4 bg-red-600 text-white rounded-xl hover:bg-red-700 font-semibold shadow-md transition"
             >
-              Again<br/>
-              <span className="text-xs">1 day</span>
+              Again
+              <div className="text-xs opacity-80 mt-1">1 day</div>
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); handleReview('hard'); }}
-              className="py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium"
+              onClick={() => handleReview('hard')}
+              className="py-4 bg-orange-600 text-white rounded-xl hover:bg-orange-700 font-semibold shadow-md transition"
             >
-              Hard<br/>
-              <span className="text-xs">2 days</span>
+              Hard
+              <div className="text-xs opacity-80 mt-1">2 days</div>
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); handleReview('good'); }}
-              className="py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium"
+              onClick={() => handleReview('good')}
+              className="py-4 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold shadow-md transition"
             >
-              Good<br/>
-              <span className="text-xs">4 days</span>
+              Good
+              <div className="text-xs opacity-80 mt-1">4 days</div>
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); handleReview('easy'); }}
-              className="py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
+              onClick={() => handleReview('easy')}
+              className="py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-md transition"
             >
-              Easy<br/>
-              <span className="text-xs">7 days</span>
+              Easy
+              <div className="text-xs opacity-80 mt-1">7 days</div>
             </button>
           </div>
         )}
+
+        {/* Keyboard Shortcuts Hint */}
+        <div className="mt-6 text-center text-sm text-gray-500">
+          <p>Click card to flip • Use arrow buttons to navigate</p>
+        </div>
       </div>
 
       <style jsx>{`
-        .perspective {
-          perspective: 1000px;
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
-        .flashcard {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          transition: transform 0.6s;
-          transform-style: preserve-3d;
-        }
-        
-        .flashcard.flipped {
-          transform: rotateY(180deg);
-        }
-        
-        .flashcard-face {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          backface-visibility: hidden;
-        }
-        
-        .flashcard-back {
-          transform: rotateY(180deg);
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out;
         }
       `}</style>
     </div>
