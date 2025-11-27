@@ -37,7 +37,7 @@ const Login = () => {
 
       <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl p-8 w-full max-w-md border border-white/20 dark:border-slate-800 transition-colors duration-300">
         <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">
-          AI Study Platform
+          SynthLearn
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-6">
