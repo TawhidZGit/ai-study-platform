@@ -232,7 +232,7 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
   );
 };
 
-// Source Viewer Component (Updated with Dark Mode)
+// Source Viewer Component
 const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
   const [zoom, setZoom] = useState(100);
   const [selectedText, setSelectedText] = useState('');
@@ -307,7 +307,7 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
         </div>
       </div>
 
-      {/* Content - Dark Mode: Dark background, White text via prose-invert */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto bg-slate-100/50 dark:bg-slate-950 p-4 sm:p-8">
         <div
           className="max-w-4xl mx-auto p-8 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[500px]"

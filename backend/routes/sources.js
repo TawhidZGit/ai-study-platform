@@ -120,10 +120,6 @@ router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'),
       [req.params.projectId]
     );
 
-    // Note: We keep the uploaded file for now (might be used for PDF viewing later)
-    // If you want to delete it after extraction, uncomment:
-    // await fs.unlink(uploadedFilePath).catch(console.error);
-
     res.json({ source: result.rows[0] });
   } catch (error) {
     // Clean up uploaded file on error

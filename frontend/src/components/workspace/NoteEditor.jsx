@@ -53,7 +53,7 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
   });
 
   // Custom CSS to restore Heading and List styles destroyed by Tailwind Reset
-  // We inject this style block directly to guarantee the editor looks right
+  // Inject this style block directly to guarantee the editor looks right
   // Added .dark selectors to handle dark mode colors manually inside the editor
   const editorStyles = `
     .ProseMirror h1 {

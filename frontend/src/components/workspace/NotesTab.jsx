@@ -125,7 +125,7 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    {/* Icon Badge - Amber adapted for Dark Mode */}
+                    {/* Icon Badge */}
                     <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex-shrink-0 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 transition-colors">
                       <StickyNote className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                     </div>

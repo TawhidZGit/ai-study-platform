@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import ThemeToggle from '../components/ThemeToggle'; 
 import { 
-  Plus, FolderOpen, FileText, StickyNote, Loader2, 
+  WandSparkles, Plus, FolderOpen, FileText, StickyNote, Loader2, 
   Trash2, Settings, Edit2, ChevronDown, 
   Calendar, ArrowUpNarrowWide, ArrowDownNarrowWide, Type, Clock,
-  Search, LayoutGrid, List as ListIcon, X
+  Search, LayoutGrid, List as ListIcon, X,
 } from 'lucide-react';
 
 const Projects = () => {
@@ -159,10 +159,10 @@ const Projects = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-              <FolderOpen className="h-5 w-5" />
+              <WandSparkles className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">AI Study Platform</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">SynthLearn</h1>
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Workspace</p>
             </div>
           </div>
@@ -386,7 +386,7 @@ const pluralize = (count, noun) => {
     return `${num} ${noun}${num === 1 ? '' : 's'}`;
 };
 
-// COMPONENT: Grid View Card (Dark Mode Styled)
+// COMPONENT: Grid View Card
 const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
@@ -492,7 +492,7 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
   );
 };
 
-// COMPONENT: List View Row (Dark Mode Styled)
+// COMPONENT: List View Row
 const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
@@ -586,9 +586,7 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
     );
 };
 
-// ----------------------------------------------------------------------
 // COMPONENT: Project Modal
-// ----------------------------------------------------------------------
 const ProjectModal = ({ project, onClose, onSaved }) => {
   const isEditMode = !!project;
   

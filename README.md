@@ -1,36 +1,72 @@
-# AI Study Platform
+# 🧠 SynthLearn
 
-An AI-powered study platform that helps students learn more efficiently by generating summaries/notes, quizzes, and flashcards from uploaded documents.
+An AI-powered study platform that utilizes a project-based learning workspace, leveraging Google's Gemini AI to transform static documents into interactive study tools. Designed to streamline the educational workflow by unifying source management, note-taking, and AI tutoring into a single, adaptive interface.
 
-## Features
+## 📸 Workspace Preview
 
-- 📄 **Document Upload** - Upload PDFs and text files
-- 📝 **AI Summaries** - Generate TL;DR, key points, and detailed notes
-- ❓ **Quiz Generation** - AI creates custom quizzes from uploaded documents
-- 🎴 **Flashcards** - Automatic flashcard generation for spaced repetition
-- 📊 **Progress Tracking** - Track your study sessions and improvement
-- 🔥 **Study Streaks** - Daily streak tracking to build study habits
-- 🏆 **Achievements** - Unlock badges for milestones
-- 📈 **Analytics Dashboard** - Visualize your learning progress
+[Insert screenshots of workspace]
 
-## Tech Stack
+## 🛠️ Tech Stack
+ 
+### Frontend:
+- **Framework:** React (Vite)
+- **Styling:** Tailwind CSS
+- **State Management**: React Context API (Auth & Theme)
+- **Editor:** TipTap (Headless WYSIWYG)
+- **Layout:** React Resizable Panels
+- **Icons:** Lucide React
+- **HTTP Client:** Axios
 
-**Frontend:**
-- React + Vite
-- Tailwind CSS
-- React Router
-- TipTap (Rich Text Editor)
-- react-resizable-panels
-- Axios
-- Recharts
-
-**Backend:**
-- Node.js + Express
-- PostgreSQL (Supabase)
+### Backend:
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** PostgreSQL (via Supabase)
 - JWT Authentication
-- Google Gemini AI
-- Multer (file uploads)
-- pdf-parse
+- **AI Integration**: Google Generative AI (Gemini Pro)
+- **File Handling:** Multer
+- **Parsing:** pdf-parse
+
+### Security
+- **Authentication:** JWT (JSON Web Tokens)
+- **Password Encryption:** Bcryptjs
+- **Middleware:** Custom auth and upload validation
+
+
+
+## ✨ Features
+
+### 📁 **Project-Based Organization**
+- **Centralized Workspaces**: Organize study materials by subject or course.
+- **Dynamic Filtering**: Sort projects by update time, creation date, or name.
+- **Smart Search**: Real-time filtering of projects and descriptions.
+
+### 🖥️ **Resizable Workspace Layout**
+1. **Sources Panel (Left dock)**: Upload, view, and manage PDFs and text files. Includes a custom built-in document viewer with zoom and text selection.
+2. **AI Chat (Center Stage)**: Context-aware chat that references your uploaded documents
+   - **4 Specialized Modes**: Study Tutor, Quiz Master, Explainer, and Summarizer.
+   - **Optimistic UI**: Instant message rendering for a snappy user experience.
+3. **Notes & AI Tools (Right Dock)**:
+   - Rich Text Editor: Powered by TipTap with formatting (bold, lists, headings).
+   - AI Tools: One-click generation of Quizzes, Flashcards, and Summaries.
+- Collapsible panels with icon docks
+
+### 🤖 **AI-Powered Features**
+- **Context-Aware Chat**: AI references your uploaded sources
+- **Automated Content Generation**:
+   - **Quiz Generation**: Multiple-choice questions with explanations and scoring
+   - **Flashcard Creation**: Interactive front/back cards with 3D flip animation
+   - **Smart Summaries**: TL;DR, key points, detailed notes, ELI5
+- **Multiple Chat Modes**: Study tutor, quiz master, explainer, summarizer
+
+### 🎨  **Modern UI/UX Design**
+
+- **Dark Mode**: Fully persistent dark mode support using React Context and Tailwind.
+
+- **Glassmorphism**: Frosted glass effects on headers and modals.
+
+- **Responsive Docks**: Collapsible side panels with icon-only dock states for focused work.
+
+- **Visual Feedback**: Loading skeletons, toast notifications, and hover micro-interactions.
 
 ## Setup Instructions
 
@@ -105,71 +141,6 @@ npm run dev
    - Click "Generate Summary" for AI-powered notes
    - Click "Create Quiz" for practice questions
    - Click "Make Flashcards" for spaced repetition
-4. **Track Progress** - View statistics and achievements
-5. **Build Streaks** - Study daily to maintain your streak
-
-## ✨ Features
-
-### 📁 **Project-Based Organization**
-- Create unlimited projects for different subjects/topics
-- Color-coded projects for easy identification
-- Track sources and notes per project
-
-### 🖥️ **Resizable Workspace Layout**
-- **Sources Panel**: Upload and manage PDFs and text files
-- **Chat Panel**: Conversational AI with 4 modes (Study, Quiz, Explain, Summarize)
-- **Notes Panel**: Rich text editor with auto-save
-- **AI Tools**: Generate quizzes, flashcards, and summaries
-- Collapsible panels with icon docks
-
-### 🤖 **AI-Powered Features**
-- **Context-Aware Chat**: AI references your uploaded sources
-- **Quiz Generation**: Multiple-choice questions with explanations
-- **Flashcard Creation**: Front/back cards for studying
-- **Smart Summaries**: TL;DR, key points, detailed notes, ELI5
-- **Multiple Chat Modes**: Study tutor, quiz master, explainer, summarizer
-
-### 📝 **Rich Text Notes**
-- Full-featured text editor
-- Auto-save functionality
-- Bold, italic, headings, lists
-- Organize notes per project
-
-### AI Summaries
-- **TL;DR**: Quick 2-3 sentence overview
-- **Key Points**: 5-8 main takeaways
-- **Detailed Notes**: Comprehensive study material
-- **ELI5**: Simplified explanations
-
-### Spaced Repetition
-Uses the SM-2 algorithm to optimize flashcard review timing:
-- **Again**: Review in 1 day
-- **Hard**: Review in 2-3 days
-- **Good**: Review in 4-7 days
-- **Easy**: Review in 7+ days
-
-### Achievements System
-Unlock badges for:
-- Uploading documents
-- Taking quizzes
-- Maintaining study streaks
-- Reviewing flashcards
-
-## 🔒 Security Features
-
-- JWT-based authentication
-- Password hashing with bcryptjs
-- SQL injection prevention
-- Protected API routes
-- Secure file upload handling
-
-## 📸 Screenshots
-
-[Insert screenshots of workspace]
-
-## Project Status
-
-🚧 **In Development** - This project is actively being built as a portfolio piece.
 
 ## 🤝 Contributing
 

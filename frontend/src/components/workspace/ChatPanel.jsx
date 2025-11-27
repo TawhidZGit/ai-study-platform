@@ -346,13 +346,11 @@ const ChatMessage = ({ message, userInitials }) => {
               {message.content}
             </p>
           ) : (
-            // CHANGED: Forced very light grey (#e5e7eb) for dark mode AI text
             <div className="prose prose-sm max-w-none prose-slate dark:prose-invert text-slate-700 dark:text-slate-300 dark:[&_*]:!text-slate-300">
               <MarkdownRenderer content={message.content} />
             </div>
           )}
         </div>
-        {/* Timestamps removed */}
       </div>
     </div>
   );

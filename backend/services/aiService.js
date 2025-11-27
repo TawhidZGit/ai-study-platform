@@ -1,8 +1,7 @@
 // Loads environment variables from a .env file
 require('dotenv').config();
 
-// This is the JSON "blueprint" the model MUST follow.
-// This matches what Summary.jsx component expects.
+// JSON "blueprint" the model MUST follow, matches what Summary.jsx component expects.
 const summarySchema = {
   type: "OBJECT",
   properties: {

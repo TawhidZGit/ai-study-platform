@@ -21,7 +21,6 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
     fetchGeneratedContent();
   }, [projectId]);
 
-  // FIX: Robust listener for generation completion
   useEffect(() => {
     let timeoutId;
     if (!isGenerating) {

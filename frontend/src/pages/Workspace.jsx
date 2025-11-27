@@ -25,7 +25,6 @@ const Workspace = () => {
   const [sourcesCollapsed, setSourcesCollapsed] = useState(false);
   const [notesCollapsed, setNotesCollapsed] = useState(false);
 
-  // LIFTED STATE: AI Generation State
   const [isGenerating, setIsGenerating] = useState(false);
   const generatingRef = useRef(false);
 
