@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import ThemeToggle from '../components/ThemeToggle'; 
 import { 
   Plus, FolderOpen, FileText, StickyNote, Loader2, 
   Trash2, Settings, Edit2, ChevronDown, 
@@ -144,34 +145,37 @@ const Projects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-100 selection:text-indigo-700 transition-colors duration-300">
       
-      {/* Header - Glassmorphism Style */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 supports-[backdrop-filter]:bg-white/60">
+      {/* Header */}
+      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 supports-[backdrop-filter]:bg-white/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
               <FolderOpen className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-none">AI Study Platform</h1>
-              <p className="text-xs font-medium text-slate-500 mt-1">Workspace</p>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">AI Study Platform</h1>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Workspace</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             <div className="hidden sm:flex flex-col items-end mr-2">
-              <span className="text-sm font-semibold text-slate-700">{user?.name}</span>
+              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{user?.name}</span>
             </div>
             <button
               onClick={handleLogout}
-              className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl hover:bg-slate-50 hover:text-rose-600 hover:border-rose-100 transition-all text-sm font-medium shadow-sm"
+              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-rose-600 hover:border-rose-100 transition-all text-sm font-medium shadow-sm"
             >
               Logout
             </button>
@@ -185,8 +189,8 @@ const Projects = () => {
         {/* Page Title & Actions */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 tracking-tight">My Projects</h2>
-            <p className="text-slate-500 mt-2 text-lg">Manage your research, notes, and AI conversations.</p>
+            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">My Projects</h2>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">Manage your research, notes, and AI conversations.</p>
           </div>
           
           <button
@@ -199,7 +203,7 @@ const Projects = () => {
         </div>
 
         {/* Filters Toolbar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
           {/* Functional Search Bar */}
           <div className="relative flex-1 w-full sm:max-w-xs ml-2">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -208,7 +212,7 @@ const Projects = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search projects..." 
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border-transparent focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 rounded-lg text-sm transition-all outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/20 rounded-lg text-sm text-slate-900 dark:text-white transition-all outline-none placeholder:text-slate-400"
             />
           </div>
 
@@ -219,7 +223,7 @@ const Projects = () => {
             <div className="relative flex-1 sm:flex-none" ref={filterRef}>
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="w-full sm:w-auto flex items-center justify-between gap-3 px-4 py-2 bg-white border border-slate-200 rounded-lg hover:border-indigo-300 hover:text-indigo-600 transition-all text-sm font-medium text-slate-600 shadow-sm"
+                className="w-full sm:w-auto flex items-center justify-between gap-3 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all text-sm font-medium text-slate-600 dark:text-slate-300 shadow-sm"
               >
                 <div className="flex items-center gap-2">
                   {currentSort && <currentSort.icon className="h-4 w-4" />}
@@ -229,7 +233,7 @@ const Projects = () => {
               </button>
 
               {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-20 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1.5 z-20 animate-in fade-in zoom-in-95 duration-100">
                   {sortOptions.map((option) => (
                     <button
                       key={option.id}
@@ -237,29 +241,31 @@ const Projects = () => {
                         setSortBy(option.id);
                         setIsFilterOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-50 transition ${
-                        sortBy === option.id ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'
+                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition ${
+                        sortBy === option.id 
+                          ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' 
+                          : 'text-slate-700 dark:text-slate-300'
                       }`}
                     >
-                      <option.icon className={`h-4 w-4 ${sortBy === option.id ? 'text-indigo-600' : 'text-slate-400'}`} />
+                      <option.icon className={`h-4 w-4 ${sortBy === option.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
                       <span className="flex-1 font-medium">{option.label}</span>
-                      {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
+                      {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />}
                     </button>
                   ))}
                 </div>
               )}
             </div>
             
-            <div className="h-6 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
             
             {/* Functional View Toggle */}
-            <div className="flex bg-slate-100 p-1 rounded-lg hidden sm:flex">
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg hidden sm:flex">
               <button 
                 onClick={() => setViewMode('grid')}
                 className={`p-1.5 rounded shadow-sm transition-all ${
                   viewMode === 'grid' 
-                    ? 'bg-white text-indigo-600' 
-                    : 'text-slate-400 hover:text-slate-600'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300' 
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >
                 <LayoutGrid className="h-4 w-4" />
@@ -268,8 +274,8 @@ const Projects = () => {
                 onClick={() => setViewMode('list')}
                 className={`p-1.5 rounded shadow-sm transition-all ${
                   viewMode === 'list' 
-                    ? 'bg-white text-indigo-600' 
-                    : 'text-slate-400 hover:text-slate-600'
+                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300' 
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >
                 <ListIcon className="h-4 w-4" />
@@ -280,24 +286,24 @@ const Projects = () => {
 
         {/* Projects Display Logic (Grid vs List) */}
         {sortedProjects.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
             {searchQuery ? (
                // No results found for search
                <>
-                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
                    <Search className="h-8 w-8 text-slate-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">No matches found</h3>
-                <p className="text-slate-500">Try adjusting your search terms</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No matches found</h3>
+                <p className="text-slate-500 dark:text-slate-400">Try adjusting your search terms</p>
                </>
             ) : (
                // No projects at all
                <>
-                <div className="w-20 h-20 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-                  <FolderOpen className="h-10 w-10 text-indigo-500" />
+                <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                  <FolderOpen className="h-10 w-10 text-indigo-500 dark:text-indigo-400" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">No projects yet</h3>
-                <p className="text-slate-500 mb-8 max-w-sm mx-auto">
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No projects yet</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">
                   Create your first project to start organizing your notes, PDFs, and AI chats.
                 </p>
                 <button
@@ -351,9 +357,7 @@ const Projects = () => {
   );
 };
 
-// ----------------------------------------------------------------------
 // HELPER: Format Time
-// ----------------------------------------------------------------------
 const formatTimeAgo = (dateString) => {
     if (!dateString) return 'Never';
     const getDiff = (d) => Math.floor((new Date() - d) / 1000);
@@ -376,16 +380,13 @@ const formatTimeAgo = (dateString) => {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
 
-// HELPER: Pluralize (FIXED: Forces number conversion)
+// HELPER: Pluralize
 const pluralize = (count, noun) => {
-    // Force count to be a number, default to 0
     const num = Number(count) || 0;
     return `${num} ${noun}${num === 1 ? '' : 's'}`;
 };
 
-// ----------------------------------------------------------------------
-// COMPONENT: Grid View Card
-// ----------------------------------------------------------------------
+// COMPONENT: Grid View Card (Dark Mode Styled)
 const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef(null);
@@ -402,7 +403,7 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
 
   return (
     <div
-      className="group relative bg-white rounded-2xl border border-slate-200 p-6 transition-all duration-300 hover:border-indigo-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 cursor-pointer flex flex-col h-full"
+      className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 transition-all duration-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 cursor-pointer flex flex-col h-full"
       onClick={onOpen}
     >
       <div className="flex justify-between items-start mb-4">
@@ -414,7 +415,7 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
             <FolderOpen className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
               {project.name}
             </h3>
             <p className="text-xs font-medium text-slate-400 flex items-center gap-1">
@@ -430,30 +431,34 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className={`p-2 rounded-full transition-colors ${showMenu ? 'bg-indigo-50 text-indigo-600' : 'text-slate-300 hover:bg-slate-50 hover:text-slate-600'}`}
+            className={`p-2 rounded-full transition-colors ${
+                showMenu 
+                ? 'bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400' 
+                : 'text-slate-300 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
+            }`}
           >
             <Settings className="h-5 w-5" />
           </button>
 
           {showMenu && (
             <div
-              className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1 origin-top-right animate-in fade-in zoom-in-95 duration-100"
+              className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 py-1 origin-top-right animate-in fade-in zoom-in-95 duration-100"
               style={{ transform: 'translateX(-10px)' }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-50 mb-1">
+              <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-50 dark:border-slate-800 mb-1">
                 Actions
               </div>
               <button
                 onClick={() => { setShowMenu(false); onEdit(); }}
-                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2 transition-colors"
+                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-2 transition-colors"
               >
                 <Edit2 className="h-4 w-4" />
                 Edit Details
               </button>
               <button
                 onClick={() => { setShowMenu(false); onDelete(); }}
-                className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2 transition-colors"
+                className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete Project
@@ -465,20 +470,20 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
 
       <div className="flex-1 mb-6">
         {project.description ? (
-          <p className="text-sm text-slate-600 leading-relaxed line-clamp-2">
+          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
             {project.description}
           </p>
         ) : (
-          <p className="text-sm text-slate-300 italic">No description added.</p>
+          <p className="text-sm text-slate-300 dark:text-slate-600 italic">No description added.</p>
         )}
       </div>
 
-      <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-100">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-semibold text-slate-600 border border-slate-100 group-hover:bg-white group-hover:border-indigo-100 transition-colors">
+      <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-indigo-100 dark:group-hover:border-indigo-900 transition-colors">
           <FileText className="h-3.5 w-3.5 text-indigo-500" />
           <span>{pluralize(project.source_count, 'Source')}</span>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-xs font-semibold text-slate-600 border border-slate-100 group-hover:bg-white group-hover:border-indigo-100 transition-colors">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-indigo-100 dark:group-hover:border-indigo-900 transition-colors">
           <StickyNote className="h-3.5 w-3.5 text-violet-500" />
           <span>{pluralize(project.note_count, 'Note')}</span>
         </div>
@@ -487,9 +492,7 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
   );
 };
 
-// ----------------------------------------------------------------------
-// COMPONENT: List View Row (New!)
-// ----------------------------------------------------------------------
+// COMPONENT: List View Row (Dark Mode Styled)
 const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
     const [showMenu, setShowMenu] = useState(false);
     const menuRef = useRef(null);
@@ -507,7 +510,7 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
     return (
         <div 
             onClick={onOpen}
-            className="group flex items-center p-4 bg-white border border-slate-200 rounded-xl hover:border-indigo-300 hover:shadow-sm cursor-pointer transition-all"
+            className="group flex items-center p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm cursor-pointer transition-all"
         >
             {/* Icon */}
             <div 
@@ -519,21 +522,21 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
 
             {/* Title & Desc */}
             <div className="flex-1 min-w-0 mr-4">
-                <h3 className="text-base font-bold text-slate-800 group-hover:text-indigo-600 truncate">
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
                     {project.name}
                 </h3>
-                <p className="text-sm text-slate-500 truncate">
-                    {project.description || <span className="text-slate-300 italic">No description</span>}
+                <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                    {project.description || <span className="text-slate-300 dark:text-slate-600 italic">No description</span>}
                 </p>
             </div>
 
             {/* Counts */}
             <div className="hidden sm:flex items-center gap-3 mr-6">
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 w-20">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-20">
                     <FileText className="h-3.5 w-3.5" />
                     {pluralize(project.source_count, 'Source')}
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 w-20">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-20">
                     <StickyNote className="h-3.5 w-3.5" />
                     {pluralize(project.note_count, 'Note')}
                 </div>
@@ -541,8 +544,8 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
 
             {/* Date */}
             <div className="hidden md:flex flex-col items-end mr-4 min-w-[80px]">
-                <span className="text-xs text-slate-400">Updated</span>
-                <span className="text-xs font-medium text-slate-600">{formatTimeAgo(project.updated_at)}</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">Updated</span>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{formatTimeAgo(project.updated_at)}</span>
             </div>
 
             {/* Settings */}
@@ -552,26 +555,26 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
                     e.stopPropagation();
                     setShowMenu(!showMenu);
                     }}
-                    className="p-2 rounded-full text-slate-300 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                    className="p-2 rounded-full text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                     <Settings className="h-5 w-5" />
                 </button>
 
                  {showMenu && (
                     <div
-                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 py-1 origin-top-right"
+                    className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 py-1 origin-top-right"
                     onClick={(e) => e.stopPropagation()}
                     >
                         <button
                             onClick={() => { setShowMenu(false); onEdit(); }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-2"
+                            className="w-full px-4 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-2"
                         >
                             <Edit2 className="h-4 w-4" />
                             Edit Details
                         </button>
                         <button
                             onClick={() => { setShowMenu(false); onDelete(); }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 flex items-center gap-2"
+                            className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2"
                         >
                             <Trash2 className="h-4 w-4" />
                             Delete Project
@@ -629,48 +632,47 @@ const ProjectModal = ({ project, onClose, onSaved }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200 border border-slate-100"
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200 border border-slate-100 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
               {isEditMode ? 'Edit Project' : 'Create Project'}
             </h2>
-            <p className="text-slate-500 text-sm mt-1">Configure your workspace details.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Configure your workspace details.</p>
           </div>
-          {/* Replaced Arrow/Chevron with X icon */}
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition text-slate-400 hover:text-slate-600">
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
              <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Project Name</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Project Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Biology 101"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 font-medium placeholder:text-slate-400"
+              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 dark:text-white font-medium placeholder:text-slate-400"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Description</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="What are you studying?"
               rows={3}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 resize-none placeholder:text-slate-400"
+              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 dark:text-white resize-none placeholder:text-slate-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-3">Theme Color</label>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Theme Color</label>
             <div className="flex gap-3 flex-wrap">
               {colors.map((c) => (
                 <button
@@ -690,8 +692,8 @@ const ProjectModal = ({ project, onClose, onSaved }) => {
           </div>
 
           {error && (
-            <div className="bg-rose-50 text-rose-600 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-rose-600 rounded-full" />
+            <div className="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-rose-600 dark:bg-rose-400 rounded-full" />
               {error}
             </div>
           )}
@@ -700,7 +702,7 @@ const ProjectModal = ({ project, onClose, onSaved }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition"
+              className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"
             >
               Cancel
             </button>

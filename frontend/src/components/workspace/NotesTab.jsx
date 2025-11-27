@@ -91,9 +91,9 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
 
   // Otherwise show notes list
   return (
-    <div className="h-full flex flex-col bg-white">
-      {/* Action Bar (Removed "My Notes" text) */}
-      <div className="p-4 border-b border-slate-200 flex-shrink-0 bg-white">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-900 transition-colors">
+      {/* Action Bar */}
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900">
         <button
           onClick={handleCreateNote}
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20 font-medium text-sm"
@@ -104,14 +104,14 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
       </div>
 
       {/* Notes List */}
-      <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-950">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
           </div>
         ) : notes.length === 0 ? (
-          <div className="text-center py-12 text-slate-400">
-            <StickyNote className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+          <div className="text-center py-12 text-slate-400 dark:text-slate-500">
+            <StickyNote className="h-10 w-10 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
             <p className="text-sm font-medium">No notes yet</p>
             <p className="text-xs mt-1">Click "New Note" to start writing</p>
           </div>
@@ -120,21 +120,21 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
             {notes.map((note) => (
               <div
                 key={note.id}
-                className="group bg-white border border-slate-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all cursor-pointer"
+                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm transition-all cursor-pointer"
                 onClick={() => setSelectedNote(note)}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    {/* Icon Badge */}
-                    <div className="p-2 bg-amber-50 rounded-lg flex-shrink-0 group-hover:bg-amber-100 transition-colors">
-                      <StickyNote className="h-5 w-5 text-amber-500" />
+                    {/* Icon Badge - Amber adapted for Dark Mode */}
+                    <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex-shrink-0 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 transition-colors">
+                      <StickyNote className="h-5 w-5 text-amber-500 dark:text-amber-400" />
                     </div>
                     
                     <div className="flex-1 min-w-0 pt-0.5">
-                      <h3 className="font-semibold text-sm text-slate-800 truncate mb-1 group-hover:text-indigo-600 transition-colors">
+                      <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100 truncate mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {note.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                      <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
                         <Clock className="h-3 w-3" />
                         <span>{formatTimeAgo(note.updated_at)}</span>
                       </div>
@@ -146,7 +146,7 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
                       e.stopPropagation();
                       handleDeleteNote(note.id);
                     }}
-                    className="p-2 opacity-0 group-hover:opacity-100 hover:bg-rose-50 rounded-lg text-slate-400 hover:text-rose-600 transition-all"
+                    className="p-2 opacity-0 group-hover:opacity-100 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-all"
                     title="Delete"
                   >
                     <Trash2 className="h-4 w-4" />

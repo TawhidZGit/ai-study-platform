@@ -114,10 +114,10 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
 
   return (
     <>
-      <div className="h-full flex flex-col bg-white">
+      <div className="h-full flex flex-col bg-white dark:bg-slate-900 transition-colors">
         {/* Header */}
-        <div className="p-4 border-b border-slate-200 flex-shrink-0">
-          <h2 className="text-lg font-bold text-slate-800 mb-3">Sources</h2>
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">Sources</h2>
           
           {/* Upload Area */}
           <div className="space-y-3">
@@ -129,14 +129,14 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center cursor-pointer group-hover:border-indigo-400 group-hover:bg-indigo-50/30 transition-all">
-                <div className="w-8 h-8 bg-slate-100 text-slate-400 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-white group-hover:text-indigo-500 transition-colors">
+              <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 text-center cursor-pointer group-hover:border-indigo-400 dark:group-hover:border-indigo-500 group-hover:bg-indigo-50/30 dark:group-hover:bg-indigo-900/20 transition-all">
+                <div className="w-8 h-8 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
                    <Upload className="h-4 w-4" />
                 </div>
-                <p className="text-xs font-semibold text-slate-600">
+                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
                   {selectedFile ? selectedFile.name : 'Click to upload'}
                 </p>
-                <p className="text-[10px] text-slate-400 mt-1">PDF or TXT (max 10MB)</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">PDF or TXT (max 10MB)</p>
               </div>
             </label>
 
@@ -151,7 +151,7 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
             )}
 
             {error && (
-              <div className="bg-rose-50 text-rose-600 p-3 rounded-xl text-xs font-medium">
+              <div className="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-3 rounded-xl text-xs font-medium">
                 {error}
               </div>
             )}
@@ -159,14 +159,14 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
         </div>
 
         {/* Sources List */}
-        <div className="flex-1 overflow-y-auto p-4 bg-slate-50">
+        <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-950">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-indigo-400" />
             </div>
           ) : sources.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
-              <FileText className="h-10 w-10 mx-auto mb-3 text-slate-300" />
+            <div className="text-center py-12 text-slate-400 dark:text-slate-600">
+              <FileText className="h-10 w-10 mx-auto mb-3 text-slate-300 dark:text-slate-700" />
               <p className="text-sm font-medium">No sources yet</p>
               <p className="text-xs mt-1">Upload files to begin</p>
             </div>
@@ -175,18 +175,18 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
               {sources.map((source) => (
                 <div
                   key={source.id}
-                  className="bg-white border border-slate-200 rounded-xl p-3 hover:border-indigo-200 hover:shadow-sm transition-all group"
+                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-3 hover:border-indigo-200 dark:hover:border-indigo-800 hover:shadow-sm transition-all group"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className="p-1.5 bg-indigo-50 rounded-lg flex-shrink-0">
-                        <FileText className="h-4 w-4 text-indigo-600" />
+                      <div className="p-1.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex-shrink-0">
+                        <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm text-slate-800 truncate">
+                        <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-200 truncate">
                           {source.filename}
                         </h3>
-                        <p className="text-[10px] font-medium text-slate-400 mt-0.5 uppercase tracking-wide">
+                        <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 mt-0.5 uppercase tracking-wide">
                           {source.word_count} words • {source.file_type || 'FILE'}
                         </p>
                       </div>
@@ -196,14 +196,14 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleViewSource(source.id)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors flex items-center justify-center gap-1.5 border border-slate-100 hover:border-indigo-100"
+                      className="flex-1 px-3 py-1.5 text-xs font-medium bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg transition-colors flex items-center justify-center gap-1.5 border border-slate-100 dark:border-slate-700 hover:border-indigo-100 dark:hover:border-indigo-800"
                     >
                       <Eye className="h-3 w-3" />
                       View Content
                     </button>
                     <button
                       onClick={() => handleDelete(source.id)}
-                      className="px-2.5 py-1.5 text-xs text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                      className="px-2.5 py-1.5 text-xs text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -232,7 +232,7 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
   );
 };
 
-// Source Viewer Component
+// Source Viewer Component (Updated with Dark Mode)
 const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
   const [zoom, setZoom] = useState(100);
   const [selectedText, setSelectedText] = useState('');
@@ -258,65 +258,65 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
   const content = (
     <>
       {/* Header */}
-      <div className="p-3 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white/90 backdrop-blur z-10">
+      <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur z-10">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-500 hover:text-slate-800">
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
             <X className="h-5 w-5" />
           </button>
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-bold text-slate-800 truncate">{source.filename}</h2>
-            <p className="text-xs text-slate-500 truncate">{source.word_count} words</p>
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{source.filename}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{source.word_count} words</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Zoom Controls */}
-          <div className="hidden sm:flex items-center gap-0.5 bg-slate-100 rounded-lg p-0.5">
+          <div className="hidden sm:flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
             <button
               onClick={() => setZoom(Math.max(50, zoom - 10))}
-              className="p-1.5 hover:bg-white hover:shadow-sm rounded text-slate-500 transition-all"
+              className="p-1.5 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded text-slate-500 dark:text-slate-400 transition-all"
               title="Zoom Out"
             >
               <ZoomOut className="h-3.5 w-3.5" />
             </button>
-            <span className="px-2 text-[10px] font-medium text-slate-600 min-w-[36px] text-center">
+            <span className="px-2 text-[10px] font-medium text-slate-600 dark:text-slate-300 min-w-[36px] text-center">
               {zoom}%
             </span>
             <button
               onClick={() => setZoom(Math.min(200, zoom + 10))}
-              className="p-1.5 hover:bg-white hover:shadow-sm rounded text-slate-500 transition-all"
+              className="p-1.5 hover:bg-white dark:hover:bg-slate-700 hover:shadow-sm rounded text-slate-500 dark:text-slate-400 transition-all"
               title="Zoom In"
             >
               <ZoomIn className="h-3.5 w-3.5" />
             </button>
           </div>
 
-          <div className="h-6 w-px bg-slate-200 mx-1"></div>
+          <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
 
-          <button onClick={handleDownload} className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition" title="Download">
+          <button onClick={handleDownload} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg transition" title="Download">
             <Download className="h-4 w-4" />
           </button>
 
-          <button onClick={onExpand} className="p-2 hover:bg-slate-100 text-slate-500 rounded-lg transition" title={expanded ? "Minimize" : "Expand"}>
+          <button onClick={onExpand} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg transition" title={expanded ? "Minimize" : "Expand"}>
             {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
 
-          <button onClick={onDelete} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition" title="Delete">
+          <button onClick={onDelete} className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition" title="Delete">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto bg-slate-100/50 p-4 sm:p-8">
+      {/* Content - Dark Mode: Dark background, White text via prose-invert */}
+      <div className="flex-1 overflow-y-auto bg-slate-100/50 dark:bg-slate-950 p-4 sm:p-8">
         <div
-          className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-sm border border-slate-200 min-h-[500px]"
+          className="max-w-4xl mx-auto p-8 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[500px]"
           style={{ fontSize: `${zoom}%` }}
           onMouseUp={handleTextSelect}
         >
-          <div className="prose prose-slate prose-sm max-w-none">
+          <div className="prose prose-slate dark:prose-invert prose-sm max-w-none">
             {source.content.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 leading-relaxed text-slate-700">
+              <p key={index} className="mb-4 leading-relaxed text-slate-700 dark:text-slate-300">
                 {paragraph || '\u00A0'}
               </p>
             ))}
@@ -325,9 +325,9 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
 
         {/* Selected Text Indicator */}
         {selectedText && (
-          <div className="fixed bottom-6 right-6 bg-amber-50 border border-amber-200 rounded-xl p-4 shadow-lg shadow-amber-500/10 max-w-xs z-50 animate-in slide-in-from-bottom-2">
-            <p className="text-xs font-bold text-amber-800 mb-1 uppercase tracking-wide">Selected Text</p>
-            <p className="text-sm text-slate-700 line-clamp-3 italic bg-white/50 p-2 rounded-lg border border-amber-100">{selectedText}</p>
+          <div className="fixed bottom-6 right-6 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 shadow-lg shadow-amber-500/10 max-w-xs z-50 animate-in slide-in-from-bottom-2">
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-400 mb-1 uppercase tracking-wide">Selected Text</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 line-clamp-3 italic bg-white/50 dark:bg-black/20 p-2 rounded-lg border border-amber-100 dark:border-amber-900/30">{selectedText}</p>
           </div>
         )}
       </div>
@@ -336,7 +336,7 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
 
   if (expanded) {
     return (
-      <div className="fixed inset-0 bg-slate-50 z-50 flex flex-col">
+      <div className="fixed inset-0 bg-slate-50 dark:bg-slate-950 z-50 flex flex-col">
         {content}
       </div>
     );

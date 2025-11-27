@@ -1,8 +1,9 @@
 import MarkdownRenderer from '../MarkdownRenderer';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Sparkles, BrainCircuit, Layers, FileText, 
-  Loader2, Trash2, Eye, X, Maximize2, Minimize2, 
+  Loader2, Trash2, Download, Eye, X, Maximize2, Minimize2, 
   ArrowLeft, ArrowRight, CheckCircle, XCircle,
   ChevronLeft, ChevronRight 
 } from 'lucide-react';
@@ -23,8 +24,6 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
   // FIX: Robust listener for generation completion
   useEffect(() => {
     let timeoutId;
-    // If generation just finished (isGenerating became false), fetch new data
-    // We add a small delay to ensure the DB write has propagated
     if (!isGenerating) {
       timeoutId = setTimeout(() => {
         fetchGeneratedContent();
@@ -32,7 +31,6 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
     }
     return () => clearTimeout(timeoutId);
   }, [isGenerating]);
-
 
   const fetchGeneratedContent = async () => {
     try {
@@ -56,30 +54,26 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
     setShowGenerateModal(false);
 
     try {
-      let response;
-      
       switch(type) {
         case 'quiz':
-          response = await api.post(`/generation/${projectId}/quiz`, {
+          await api.post(`/generation/${projectId}/quiz`, {
             numQuestions: options.numQuestions || 10,
             title: options.title
           });
           break;
         case 'flashcards':
-          response = await api.post(`/generation/${projectId}/flashcards`, {
+          await api.post(`/generation/${projectId}/flashcards`, {
             numCards: options.numCards || 20,
             title: options.title
           });
           break;
         case 'summary':
-          response = await api.post(`/generation/${projectId}/summary`, {
+          await api.post(`/generation/${projectId}/summary`, {
             title: options.title
           });
           break;
       }
-
-      await fetchGeneratedContent();
-      setViewingContent(response.data.content);
+      // Fetch handled by useEffect on isGenerating change
     } catch (error) {
       console.error('Generate error:', error);
       alert(error.response?.data?.error || 'Failed to generate content');
@@ -104,7 +98,16 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
     }
   };
 
-  // If viewing specific content
+  const handleDownload = (content) => {
+    const dataStr = JSON.stringify(content.data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+    const exportFileDefaultName = `${content.title}.json`;
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
   if (viewingContent) {
     return (
       <ContentViewer 
@@ -121,9 +124,9 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-900 transition-colors">
       {/* Generate Buttons */}
-      <div className="p-4 border-b border-gray-200 space-y-2 flex-shrink-0 bg-white">
+      <div className="p-4 border-b border-gray-200 dark:border-slate-800 space-y-2 flex-shrink-0 bg-white dark:bg-slate-900">
         <button
           onClick={() => {
             if (!isGenerating) {
@@ -168,14 +171,14 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
       </div>
 
       {/* Generated Content List */}
-      <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-slate-950">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400 dark:text-slate-500" />
           </div>
         ) : generatedContent.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <Sparkles className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+          <div className="text-center py-12 text-gray-400 dark:text-slate-500">
+            <Sparkles className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-slate-700" />
             <p className="text-sm font-medium">No generated content yet</p>
             <p className="text-xs mt-1">Upload sources and generate content!</p>
           </div>
@@ -187,6 +190,7 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
                 content={content}
                 onView={() => setViewingContent(content)}
                 onDelete={() => handleDelete(content.id)}
+                onDownload={() => handleDownload(content)}
               />
             ))}
           </div>
@@ -209,10 +213,10 @@ const AIToolsTab = ({ projectId, isGenerating, setIsGenerating, generatingRef })
 const ContentCard = ({ content, onView, onDelete }) => {
   const getIcon = () => {
     switch(content.content_type) {
-      case 'quiz': return <BrainCircuit className="h-5 w-5 text-[#A167A5]" />;
-      case 'flashcards': return <Layers className="h-5 w-5 text-violet-800" />;
-      case 'summary': return <FileText className="h-5 w-5 text-purple-800" />;
-      default: return <Sparkles className="h-5 w-5 text-gray-600" />;
+      case 'quiz': return <BrainCircuit className="h-5 w-5 text-[#A167A5] dark:text-[#dcb0df]" />;
+      case 'flashcards': return <Layers className="h-5 w-5 text-violet-800 dark:text-violet-400" />;
+      case 'summary': return <FileText className="h-5 w-5 text-purple-800 dark:text-purple-400" />;
+      default: return <Sparkles className="h-5 w-5 text-gray-600 dark:text-slate-400" />;
     }
   };
 
@@ -230,30 +234,30 @@ const ContentCard = ({ content, onView, onDelete }) => {
   return (
     <div 
       onClick={onView}
-      className="bg-white border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all group cursor-pointer relative"
+      className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-lg p-4 hover:border-blue-300 dark:hover:border-indigo-700 hover:shadow-sm transition-all group cursor-pointer relative"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          <div className="p-2 bg-gray-50 rounded-lg">
+          <div className="p-2 bg-gray-50 dark:bg-slate-800 rounded-lg">
             {getIcon()}
           </div>
           <div className="flex-1 min-w-0 pt-0.5">
-            <h3 className="font-medium text-sm text-gray-800 truncate">
+            <h3 className="font-medium text-sm text-gray-800 dark:text-slate-200 truncate">
               {content.title}
             </h3>
-            <p className="text-xs text-gray-500 capitalize mt-0.5">
+            <p className="text-xs text-gray-500 dark:text-slate-400 capitalize mt-0.5">
               {content.content_type}{count && ` • ${count}`}
             </p>
           </div>
         </div>
 
-        {/* Trash Button - Only visible on hover, Red only on hover */}
+        {/* Trash Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
           }}
-          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition opacity-0 group-hover:opacity-100"
+          className="p-2 text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition opacity-0 group-hover:opacity-100"
           title="Delete"
         >
           <Trash2 className="h-4 w-4" />
@@ -288,23 +292,23 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100"
+        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100 dark:border-slate-800"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900">{getTitle()}</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition text-gray-400 hover:text-gray-600">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-slate-100">{getTitle()}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-full transition text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
               Title (Optional)
             </label>
             <input
@@ -312,19 +316,19 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={`${type.charAt(0).toUpperCase() + type.slice(1)} - ${new Date().toLocaleDateString()}`}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 font-medium"
+              className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 dark:text-slate-100 font-medium placeholder:text-gray-400 dark:placeholder:text-slate-500"
             />
           </div>
 
           {type === 'quiz' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Number of Questions
               </label>
               <select
                 value={numQuestions}
                 onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 font-medium"
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 dark:text-slate-100 font-medium"
               >
                 <option value={5}>5 Questions</option>
                 <option value={10}>10 Questions</option>
@@ -336,13 +340,13 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
 
           {type === 'flashcards' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                 Number of Cards
               </label>
               <select
                 value={numCards}
                 onChange={(e) => setNumCards(parseInt(e.target.value))}
-                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 font-medium"
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none text-gray-900 dark:text-slate-100 font-medium"
               >
                 <option value={10}>10 Cards</option>
                 <option value={20}>20 Cards</option>
@@ -356,13 +360,13 @@ const GenerateModal = ({ type, onClose, onGenerate }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition"
+              className="flex-1 px-4 py-2.5 border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-slate-300 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 bg-blue-600 text-white px-4 py-2.5 font-medium rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-500/20"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white px-4 py-2.5 font-medium rounded-xl transition shadow-lg shadow-blue-500/20"
             >
               Generate
             </button>
@@ -385,7 +389,6 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
   const isFlashcards = content.content_type === 'flashcards';
   const data = content.data;
 
-  // Initialize user answers for quiz
   useEffect(() => {
     if (isQuiz && userAnswers.length === 0) {
       setUserAnswers(new Array(data.questions?.length || 0).fill(null));
@@ -412,7 +415,6 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
       setSelectedAnswer(userAnswers[currentIndex + 1]);
       setIsChecked(userAnswers[currentIndex + 1] !== null);
     } else {
-      // Show results after last question
       setShowResults(true);
     }
   };
@@ -447,26 +449,26 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
     const incorrect = data.questions.length - score;
 
     return (
-      <div className="h-full flex items-center justify-center p-8 bg-gray-50">
+      <div className="h-full flex items-center justify-center p-8 bg-gray-50 dark:bg-slate-950">
         <div className="max-w-md w-full">
-          <div className="bg-white rounded-xl shadow-lg p-8 text-center border border-gray-200">
+          <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8 text-center border border-gray-200 dark:border-slate-800">
             <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-3xl font-bold text-white">{percentage}%</span>
             </div>
             
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Quiz Complete!</h2>
-            <p className="text-gray-600 mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 dark:text-slate-100 mb-2">Quiz Complete!</h2>
+            <p className="text-gray-600 dark:text-slate-400 mb-8">
               You scored {score} out of {data.questions.length}
             </p>
 
             <div className="grid grid-cols-2 gap-4 mb-8">
-              <div className="bg-green-50 rounded-lg p-4">
-                <div className="text-3xl font-bold text-green-600 mb-1">{score}</div>
-                <div className="text-sm text-gray-600">Correct</div>
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-100 dark:border-green-900/30">
+                <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{score}</div>
+                <div className="text-sm text-gray-600 dark:text-slate-400">Correct</div>
               </div>
-              <div className="bg-red-50 rounded-lg p-4">
-                <div className="text-3xl font-bold text-red-600 mb-1">{incorrect}</div>
-                <div className="text-sm text-gray-600">Incorrect</div>
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 border border-red-100 dark:border-red-900/30">
+                <div className="text-3xl font-bold text-red-600 dark:text-red-400 mb-1">{incorrect}</div>
+                <div className="text-sm text-gray-600 dark:text-slate-400">Incorrect</div>
               </div>
             </div>
 
@@ -478,7 +480,7 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
                 setSelectedAnswer(null);
                 setIsChecked(false);
               }}
-              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+              className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-lg transition font-medium"
             >
               Review Answers
             </button>
@@ -498,20 +500,20 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
     const isCorrect = selectedAnswer === question.correctAnswer;
 
     return (
-      <div className="h-full flex flex-col bg-white">
+      <div className="h-full flex flex-col bg-white dark:bg-slate-900">
         {/* Progress */}
-        <div className="p-4 border-b border-gray-200 flex-shrink-0">
+        <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex-shrink-0">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-gray-600 dark:text-slate-400">
               Question {currentIndex + 1} of {data.questions.length}
             </span>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-gray-500 dark:text-slate-500">
               {userAnswers.filter(a => a !== null).length} answered
             </span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-indigo-600 transition-all duration-300"
+              className="h-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -519,30 +521,30 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
 
         {/* Question */}
         <div className="flex-1 overflow-y-auto p-4">
-          <h3 className="text-lg font-semibold text-gray-800 mb-6 leading-relaxed">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-6 leading-relaxed">
             {question.question}
           </h3>
 
           {/* Options */}
           <div className="space-y-3 mb-6">
             {question.options.map((option, index) => {
-              let bgColor = 'bg-white hover:bg-gray-50';
-              let borderColor = 'border-gray-300';
-              let textColor = 'text-gray-800';
+              let bgColor = 'bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700';
+              let borderColor = 'border-gray-300 dark:border-slate-700';
+              let textColor = 'text-gray-800 dark:text-slate-200';
               
               if (isChecked) {
                 if (index === question.correctAnswer) {
-                  bgColor = 'bg-green-50';
-                  borderColor = 'border-green-500';
-                  textColor = 'text-green-900';
+                  bgColor = 'bg-green-50 dark:bg-green-900/20';
+                  borderColor = 'border-green-500 dark:border-green-600';
+                  textColor = 'text-green-900 dark:text-green-300';
                 } else if (index === selectedAnswer && !isCorrect) {
-                  bgColor = 'bg-red-50';
-                  borderColor = 'border-red-500';
-                  textColor = 'text-red-900';
+                  bgColor = 'bg-red-50 dark:bg-red-900/20';
+                  borderColor = 'border-red-500 dark:border-red-600';
+                  textColor = 'text-red-900 dark:text-red-300';
                 }
               } else if (selectedAnswer === index) {
-                bgColor = 'bg-indigo-50';
-                borderColor = 'border-indigo-500';
+                bgColor = 'bg-indigo-50 dark:bg-indigo-900/20';
+                borderColor = 'border-indigo-500 dark:border-indigo-500';
               }
 
               return (
@@ -554,21 +556,21 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
                 >
                   <div className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center font-semibold text-xs ${
                     isChecked && index === question.correctAnswer 
-                      ? 'bg-green-500 text-white border-green-500' 
+                      ? 'bg-green-500 border-green-500 text-white' 
                       : isChecked && index === selectedAnswer && !isCorrect
-                      ? 'bg-red-500 text-white border-red-500'
+                      ? 'bg-red-500 border-red-500 text-white'
                       : selectedAnswer === index
-                      ? 'bg-indigo-500 text-white border-indigo-500'
-                      : 'bg-white'
+                      ? 'bg-indigo-500 border-indigo-500 text-white'
+                      : 'bg-white dark:bg-slate-900 border-gray-300 dark:border-slate-600 text-gray-500 dark:text-slate-400'
                   }`}>
                     {String.fromCharCode(65 + index)}
                   </div>
                   <span className="flex-1 text-sm">{option}</span>
                   {isChecked && index === question.correctAnswer && (
-                    <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+                    <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                   )}
                   {isChecked && index === selectedAnswer && !isCorrect && (
-                    <XCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
                   )}
                 </button>
               );
@@ -577,11 +579,15 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
 
           {/* Explanation */}
           {isChecked && (
-            <div className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50 border-2 border-green-200' : 'bg-red-50 border-2 border-red-200'}`}>
-              <p className={`font-bold text-sm mb-2 ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+            <div className={`p-4 rounded-lg ${
+              isCorrect 
+                ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-200 dark:border-green-900/30' 
+                : 'bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-900/30'
+            }`}>
+              <p className={`font-bold text-sm mb-2 ${isCorrect ? 'text-green-800 dark:text-green-300' : 'text-red-800 dark:text-red-300'}`}>
                 {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
               </p>
-              <div className="text-sm text-gray-700">
+              <div className="text-sm text-gray-700 dark:text-slate-300 dark:[&_*]:!text-slate-300">
                 <MarkdownRenderer content={question.explanation} />
               </div>
             </div>
@@ -589,11 +595,11 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
         </div>
 
         {/* Navigation */}
-        <div className="p-4 border-t border-gray-200 flex items-center justify-between gap-2 flex-shrink-0">
+        <div className="p-4 border-t border-gray-200 dark:border-slate-800 flex items-center justify-between gap-2 flex-shrink-0">
           <button
             onClick={handleQuizPrevious}
             disabled={currentIndex === 0}
-            className="flex items-center gap-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm"
+            className="flex items-center gap-1 px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm text-gray-700 dark:text-slate-300"
           >
             <ArrowLeft className="h-4 w-4" />
             Previous
@@ -603,14 +609,14 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
             <button
               onClick={handleQuizCheck}
               disabled={selectedAnswer === null}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
             >
               Check Answer
             </button>
           ) : (
             <button
               onClick={handleQuizNext}
-              className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-sm"
+              className="flex items-center gap-1 px-3 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-500 text-white rounded-lg transition font-medium text-sm"
             >
               {currentIndex === data.questions.length - 1 ? 'View Results' : 'Next Question'}
               <ArrowRight className="h-4 w-4" />
@@ -626,17 +632,17 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
     const progress = ((currentIndex + 1) / data.cards.length) * 100;
 
     return (
-      <div className="h-full flex flex-col bg-gray-50">
+      <div className="h-full flex flex-col bg-gray-50 dark:bg-slate-950">
         {/* Progress */}
-        <div className="p-4 border-b border-gray-200 flex-shrink-0 bg-white">
+        <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-sm font-medium text-gray-600 dark:text-slate-400">
               Card {currentIndex + 1} of {data.cards.length}
             </span>
           </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-indigo-600 transition-all duration-300"
+              className="h-full bg-purple-600 dark:bg-purple-500 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -647,7 +653,7 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
           <button
             onClick={handleFlashcardPrevious}
             disabled={currentIndex === 0}
-            className="absolute left-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition z-10"
+            className="absolute left-4 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition z-10 text-gray-600 dark:text-slate-300"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
@@ -667,45 +673,45 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
             >
               {/* Front */}
               <div 
-                className="absolute inset-0 w-full h-full bg-white rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center"
+                className="absolute inset-0 w-full h-full bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center border border-gray-100 dark:border-slate-700"
                 style={{
                   backfaceVisibility: 'hidden',
                   overflow: 'hidden'
                 }}
               >
-                <div className="text-xs font-medium text-indigo-600 mb-3 uppercase tracking-wide flex-shrink-0">Question</div>
+                <div className="text-xs font-medium text-indigo-600 dark:text-indigo-400 mb-3 uppercase tracking-wide flex-shrink-0">Question</div>
                 
                 <div className="flex-1 w-full overflow-y-auto px-2">
                   <div className="min-h-full flex flex-col items-center justify-center">
-                    <div className="text-base font-medium text-gray-800 leading-relaxed text-center">
+                    <div className="text-base font-medium text-gray-800 dark:text-slate-100 dark:[&_*]:!text-slate-100 leading-relaxed text-center">
                       <MarkdownRenderer content={card.front} />
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-400 mt-3 flex-shrink-0">Click to reveal answer</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500 mt-3 flex-shrink-0">Click to reveal answer</p>
               </div>
               
               {/* Back */}
               <div 
-                className="absolute inset-0 w-full h-full bg-white border-2 border-purple-100 rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center"
+                className="absolute inset-0 w-full h-full bg-white dark:bg-slate-800 border-2 border-purple-100 dark:border-purple-900/30 rounded-xl shadow-xl p-6 flex flex-col items-center justify-center text-center"
                 style={{
                   backfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
                   overflow: 'hidden'
                 }}
               >
-                <div className="text-xs font-medium text-purple-600 mb-3 uppercase tracking-wide flex-shrink-0">Answer</div>
+                <div className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-3 uppercase tracking-wide flex-shrink-0">Answer</div>
                 
                 <div className="flex-1 w-full overflow-y-auto px-2">
                   <div className="min-h-full flex flex-col items-center justify-center">
-                    <div className="text-base font-medium text-gray-800 leading-relaxed text-center">
+                    <div className="text-base font-medium text-gray-800 dark:text-slate-300 dark:[&_*]:!text-slate-300 leading-relaxed text-center">
                       <MarkdownRenderer content={card.back} />
                     </div>
                   </div>
                 </div>
 
-                <p className="text-xs text-gray-400 mt-3 flex-shrink-0">Click to flip back</p>
+                <p className="text-xs text-gray-400 dark:text-slate-500 mt-3 flex-shrink-0">Click to flip back</p>
               </div>
             </div>
           </div>
@@ -713,14 +719,14 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
           <button
             onClick={handleFlashcardNext}
             disabled={currentIndex === data.cards.length - 1}
-            className="absolute right-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition z-10"
+            className="absolute right-4 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-30 disabled:cursor-not-allowed transition z-10 text-gray-600 dark:text-slate-300"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
 
         {/* Hint */}
-        <div className="p-4 text-center text-xs text-gray-500 flex-shrink-0">
+        <div className="p-4 text-center text-xs text-gray-500 dark:text-slate-500 flex-shrink-0">
           Click card to flip • Use arrows to navigate
         </div>
       </div>
@@ -729,26 +735,26 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
 
   const renderSummaryContent = () => {
     return (
-      <div className="h-full overflow-y-auto p-4 bg-white">
+      <div className="h-full overflow-y-auto p-4 bg-white dark:bg-slate-900">
         <div className="space-y-6">
           {/* TL;DR */}
-          <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">TL;DR</h3>
-            <div className="text-gray-800">
+          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-100 dark:border-blue-900/30">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-blue-300 mb-2">TL;DR</h3>
+            <div className="text-gray-800 dark:text-slate-200 dark:[&_*]:!text-slate-200">
               <MarkdownRenderer content={data.tldr} />
             </div>
           </div>
 
           {/* Key Points */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Key Points</h3>
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Key Points</h3>
             <ul className="space-y-2">
               {data.keyPoints?.map((point, index) => (
                 <li key={index} className="flex items-start gap-2">
-                  <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-medium">
+                  <span className="flex-shrink-0 w-6 h-6 bg-blue-600 dark:bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-medium">
                     {index + 1}
                   </span>
-                  <span className="text-gray-700 pt-0.5 text-sm">
+                  <span className="text-gray-700 dark:text-slate-300 dark:[&_*]:!text-slate-300 pt-0.5 text-sm">
                     <MarkdownRenderer content={point} />
                   </span>
                 </li>
@@ -758,16 +764,16 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
 
           {/* Detailed Notes */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Detailed Notes</h3>
-            <div className="prose prose-sm max-w-none text-gray-700">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">Detailed Notes</h3>
+            <div className="prose prose-sm max-w-none text-gray-700 dark:text-slate-300 dark:[&_*]:!text-slate-300 dark:prose-invert">
               <MarkdownRenderer content={data.detailedNotes} />
             </div>
           </div>
 
           {/* Simple Explanation */}
-          <div className="bg-green-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">Simple Explanation (ELI5)</h3>
-            <div className="text-gray-800">
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-100 dark:border-green-900/30">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-green-300 mb-2">Simple Explanation (ELI5)</h3>
+            <div className="text-gray-800 dark:text-slate-200 dark:[&_*]:!text-slate-200">
               <MarkdownRenderer content={data.simpleExplanation} />
             </div>
           </div>
@@ -776,55 +782,56 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
     );
   };
 
-  // Expanded view modal
+  // Expanded view using Portal to fix z-index header issue
   if (expanded) {
-    return (
-      <div className="fixed inset-0 bg-white z-50 flex flex-col">
+    return createPortal(
+      <div className="fixed inset-0 bg-white dark:bg-slate-900 z-[100] flex flex-col animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+        <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <X className="h-5 w-5" />
+            <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition">
+              <X className="h-5 w-5 text-gray-600 dark:text-slate-400" />
             </button>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">{content.title}</h2>
-              <p className="text-sm text-gray-500 capitalize">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-slate-100">{content.title}</h2>
+              <p className="text-sm text-gray-500 dark:text-slate-400 capitalize">
                 {content.content_type} • {new Date(content.created_at).toLocaleDateString()}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => onExpand(false)} className="p-2 hover:bg-gray-100 rounded-lg transition" title="Minimize">
-              <Minimize2 className="h-5 w-5" />
+            <button onClick={() => onExpand(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition" title="Minimize">
+              <Minimize2 className="h-5 w-5 text-gray-600 dark:text-slate-400" />
             </button>
-            <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+            <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition" title="Delete">
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-slate-950">
           {isQuiz ? renderQuizContent() : isFlashcards ? renderFlashcardsContent() : renderSummaryContent()}
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // Panel view
   return (
-    <div className="h-full flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white dark:bg-slate-900 border-l border-gray-200 dark:border-slate-800">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-        <button onClick={onBack} className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition font-medium">
+      <div className="p-4 border-b border-gray-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
+        <button onClick={onBack} className="flex items-center gap-2 text-gray-600 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 transition font-medium">
           <X className="h-5 w-5" />
           <span className="text-sm">Close</span>
         </button>
         <div className="flex items-center gap-2">
-          <button onClick={() => onExpand(true)} className="p-2 hover:bg-gray-100 rounded-lg transition" title="Expand">
+          <button onClick={() => onExpand(true)} className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition text-gray-600 dark:text-slate-400" title="Expand">
             <Maximize2 className="h-4 w-4" />
           </button>
-          <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+          <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition" title="Delete">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
@@ -832,8 +839,8 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
 
       {/* Title */}
       <div className="px-4 pt-3 flex-shrink-0">
-        <h2 className="text-lg font-bold text-gray-800 truncate">{content.title}</h2>
-        <p className="text-xs text-gray-500 capitalize mt-0.5">
+        <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100 truncate">{content.title}</h2>
+        <p className="text-xs text-gray-500 dark:text-slate-400 capitalize mt-0.5">
           {content.content_type}
         </p>
       </div>

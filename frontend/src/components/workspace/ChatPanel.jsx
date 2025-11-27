@@ -157,23 +157,23 @@ const ChatPanel = ({ projectId }) => {
 
   if (loadingHistory) {
     return (
-      <div className="h-full flex items-center justify-center bg-slate-50">
+      <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-50">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors">
       {/* Header */}
-      <div className="p-4 border-b border-slate-200 flex items-center justify-between flex-shrink-0 bg-white/80 backdrop-blur-md z-20 sticky top-0">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-20 sticky top-0">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 rounded-lg">
-            <MessageCircle className="h-5 w-5 text-indigo-600" />
+          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+            <MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-800">AI Assistant</h2>
-            <p className="text-xs text-slate-500">Ask questions about your sources</p>
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">AI Assistant</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Ask questions about your sources</p>
           </div>
         </div>
         
@@ -182,17 +182,17 @@ const ChatPanel = ({ projectId }) => {
           <div className="relative" ref={modeDropdownRef}>
             <button
               onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all text-xs font-semibold text-slate-600 min-w-[140px] justify-between shadow-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all text-xs font-semibold text-slate-600 dark:text-slate-300 min-w-[140px] justify-between shadow-sm"
             >
               <div className="flex items-center gap-2">
-                {currentMode && <currentMode.icon className="h-3.5 w-3.5 text-indigo-600" />}
+                {currentMode && <currentMode.icon className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />}
                 <span>{currentMode?.label}</span>
               </div>
               <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${isModeDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isModeDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-60 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                 <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Select AI Mode
                 </div>
@@ -203,23 +203,23 @@ const ChatPanel = ({ projectId }) => {
                       setMode(m.id);
                       setIsModeDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition flex items-start gap-3 ${
-                      mode === m.id ? 'bg-indigo-50/60' : ''
+                    className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-start gap-3 ${
+                      mode === m.id ? 'bg-indigo-50/60 dark:bg-indigo-900/20' : ''
                     }`}
                   >
                     <div className={`mt-0.5 p-1.5 rounded-lg ${
-                      mode === m.id ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-500'
+                      mode === m.id ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
                     }`}>
                       <m.icon className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1">
                       <div className={`text-sm font-medium flex items-center gap-2 ${
-                        mode === m.id ? 'text-indigo-700' : 'text-slate-700'
+                        mode === m.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'
                       }`}>
                         {m.label}
                         {mode === m.id && <Check className="h-3 w-3" />}
                       </div>
-                      <p className="text-xs text-slate-500 mt-0.5 leading-tight">{m.desc}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{m.desc}</p>
                     </div>
                   </button>
                 ))}
@@ -230,7 +230,7 @@ const ChatPanel = ({ projectId }) => {
           {messages.length > 0 && (
             <button
               onClick={handleClearChat}
-              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+              className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition"
               title="Clear Chat"
             >
               <Trash2 className="h-4 w-4" />
@@ -242,13 +242,13 @@ const ChatPanel = ({ projectId }) => {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-slate-400">
+          <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-600">
             <div className="text-center">
-              <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-indigo-300" />
+              <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
+                <Sparkles className="h-8 w-8 text-indigo-300 dark:text-indigo-700" />
               </div>
-              <p className="text-lg font-semibold text-slate-700 mb-2">Start a Conversation</p>
-              <p className="text-sm text-slate-500">Upload sources and ask questions to begin!</p>
+              <p className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">Start a Conversation</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Upload sources and ask questions to begin!</p>
             </div>
           </div>
         ) : (
@@ -261,7 +261,7 @@ const ChatPanel = ({ projectId }) => {
                 <div key={message.id}>
                   {isNewDay && (
                     <div className="flex justify-center my-6">
-                      <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full border border-slate-200 uppercase tracking-wide">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 uppercase tracking-wide">
                         {formatDateSeparator(message.created_at)}
                       </span>
                     </div>
@@ -272,11 +272,11 @@ const ChatPanel = ({ projectId }) => {
             })}
             {loading && (
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-4 w-4 text-indigo-600" />
+                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <div className="flex-1 bg-white border border-slate-100 shadow-sm rounded-2xl rounded-tl-none p-4">
-                  <div className="flex items-center gap-2 text-slate-500 text-sm">
+                <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-2xl rounded-tl-none p-4">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Thinking...
                   </div>
@@ -289,7 +289,7 @@ const ChatPanel = ({ projectId }) => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-slate-200 bg-white flex-shrink-0">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
         <div className="flex gap-2 items-end">
           <textarea
             ref={inputRef}
@@ -299,7 +299,7 @@ const ChatPanel = ({ projectId }) => {
             placeholder={`Type your message to ${currentMode?.label}...`}
             disabled={loading}
             rows={1}
-            className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 placeholder:text-slate-400 resize-none shadow-inner text-sm transition-all"
+            className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none shadow-inner text-sm transition-all"
             style={{ minHeight: '44px', maxHeight: '120px' }}
             onInput={(e) => {
               e.target.style.height = 'auto';
@@ -309,7 +309,7 @@ const ChatPanel = ({ projectId }) => {
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40"
+            className="p-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40"
           >
             <Send className="h-5 w-5" />
           </button>
@@ -326,30 +326,33 @@ const ChatMessage = ({ message, userInitials }) => {
   return (
     <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${
-        isUser ? 'bg-indigo-600 border-indigo-600' : 'bg-white border-slate-200'
+        isUser ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-600 dark:border-indigo-500' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
       }`}>
         {isUser ? (
           <span className="text-white text-xs font-bold">{userInitials}</span>
         ) : (
-          <Sparkles className="h-4 w-4 text-indigo-600" />
+          <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
         )}
       </div>
 
-      <div className={`flex-1 max-w-[85%] ${isUser ? 'text-right' : ''}`}>
+     <div className={`flex-1 max-w-[85%] ${isUser ? 'text-right' : ''}`}>
         <div className={`inline-block text-left rounded-2xl p-4 shadow-sm text-sm leading-relaxed ${
           isUser 
-            ? 'bg-indigo-600 text-white rounded-tr-sm' 
-            : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'
+            ? 'bg-indigo-600 dark:bg-indigo-500 text-white rounded-tr-sm' 
+            : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-tl-sm'
         }`}>
           {isUser ? (
             <p className="whitespace-pre-wrap">
               {message.content}
             </p>
           ) : (
-            <MarkdownRenderer content={message.content} />
+            // CHANGED: Forced very light grey (#e5e7eb) for dark mode AI text
+            <div className="prose prose-sm max-w-none prose-slate dark:prose-invert text-slate-700 dark:text-slate-300 dark:[&_*]:!text-slate-300">
+              <MarkdownRenderer content={message.content} />
+            </div>
           )}
         </div>
-        {/* Timestamps removed per request */}
+        {/* Timestamps removed */}
       </div>
     </div>
   );

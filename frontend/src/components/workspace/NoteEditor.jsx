@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -37,7 +38,7 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
     content: note.content || '',
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[200px] p-4 dark:prose-invert',
       },
     },
     onUpdate: () => {
@@ -53,6 +54,7 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
 
   // Custom CSS to restore Heading and List styles destroyed by Tailwind Reset
   // We inject this style block directly to guarantee the editor looks right
+  // Added .dark selectors to handle dark mode colors manually inside the editor
   const editorStyles = `
     .ProseMirror h1 {
       font-size: 1.875rem;
@@ -98,6 +100,14 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
       margin-top: 0.5em;
       margin-bottom: 0.5em;
     }
+    
+    /* Dark Mode Overrides */
+    .dark .ProseMirror h1 { color: #f1f5f9; }
+    .dark .ProseMirror h2 { color: #e2e8f0; }
+    .dark .ProseMirror h3 { color: #cbd5e1; }
+    .dark .ProseMirror p, .dark .ProseMirror li { color: #cbd5e1; }
+    .dark .ProseMirror ul, .dark .ProseMirror ol { color: #cbd5e1; }
+    .dark .ProseMirror .is-editor-empty:before { color: #64748b; }
   `;
 
   // Close dropdown when clicking outside
@@ -143,7 +153,7 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
     }
   };
 
-  if (!editor) return <div className="p-4">Loading editor...</div>;
+  if (!editor) return <div className="p-4 dark:text-slate-300">Loading editor...</div>;
 
   // Helper to get current heading label
   const getCurrentHeadingLabel = () => {
@@ -168,44 +178,44 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
       <style>{editorStyles}</style>
 
       {/* Header */}
-      <div className="p-4 border-b flex items-center justify-between flex-shrink-0 bg-white">
-        <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg transition">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0 bg-white dark:bg-slate-900">
+        <button onClick={onBack} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-400">
           {expanded ? <X className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
         </button>
 
         <div className="flex items-center gap-2">
-          {saving && <span className="text-xs text-gray-500">Saving...</span>}
+          {saving && <span className="text-xs text-slate-500 dark:text-slate-400">Saving...</span>}
           {lastSaved && !saving && (
-            <span className="text-xs text-gray-500">Saved {lastSaved.toLocaleTimeString()}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Saved {lastSaved.toLocaleTimeString()}</span>
           )}
-          <button onClick={onToggleExpand} className="p-2 hover:bg-gray-100 rounded-lg transition" title={expanded ? "Minimize" : "Expand"}>
+          <button onClick={onToggleExpand} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-600 dark:text-slate-400" title={expanded ? "Minimize" : "Expand"}>
             {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </button>
-          <button onClick={onDelete} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Note">
+          <button onClick={onDelete} className="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition" title="Delete Note">
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
       </div>
 
       {/* Title Input */}
-      <div className="px-4 pt-4 flex-shrink-0 bg-white">
+      <div className="px-4 pt-4 flex-shrink-0 bg-white dark:bg-slate-900">
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full text-2xl font-bold border-none focus:outline-none focus:ring-0 p-0 bg-transparent"
+          className="w-full text-2xl font-bold border-none focus:outline-none focus:ring-0 p-0 bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
           placeholder="Note Title"
         />
       </div>
 
       {/* Toolbar */}
-      <div className="px-4 py-2 border-b flex items-center gap-1 flex-shrink-0 bg-white flex-wrap z-20 relative">
+      <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center gap-1 flex-shrink-0 bg-white dark:bg-slate-900 flex-wrap z-20 relative">
         {/* Undo/Redo */}
         <div className="flex items-center gap-0.5 mr-2">
           <button
             onClick={() => editor.chain().focus().undo().run()}
             disabled={!editor.can().undo()}
-            className="p-2 rounded hover:bg-gray-100 text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent transition"
+            className="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:hover:bg-transparent transition"
             title="Undo"
           >
             <Undo className="h-4 w-4" />
@@ -213,27 +223,27 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
           <button
             onClick={() => editor.chain().focus().redo().run()}
             disabled={!editor.can().redo()}
-            className="p-2 rounded hover:bg-gray-100 text-gray-600 disabled:opacity-30 disabled:hover:bg-transparent transition"
+            className="p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 disabled:opacity-30 disabled:hover:bg-transparent transition"
             title="Redo"
           >
             <Redo className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1" />
 
         {/* Custom Heading Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowHeadingDropdown(!showHeadingDropdown)}
-            className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-md hover:bg-gray-100 text-sm font-medium text-gray-700 w-40 transition border border-gray-200 shadow-sm"
+            className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-sm font-medium text-slate-700 dark:text-slate-300 w-40 transition border border-slate-200 dark:border-slate-700 shadow-sm"
           >
             <span className="truncate">{getCurrentHeadingLabel()}</span>
             <ChevronDown className="h-3 w-3 opacity-50" />
           </button>
           
           {showHeadingDropdown && (
-            <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-50">
+            <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-100 dark:border-slate-700 py-1 z-50">
               {[
                 { label: 'Normal Text', value: 0 },
                 { label: 'Heading 1', value: 1 },
@@ -243,10 +253,10 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
                 <button
                   key={option.value}
                   onClick={() => setHeading(option.value)}
-                  className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between hover:bg-gray-50 transition ${
+                  className={`w-full text-left px-4 py-2 text-sm flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700 transition ${
                     (option.value === 0 && !editor.isActive('heading')) || editor.isActive('heading', { level: option.value })
-                      ? 'text-blue-600 bg-blue-50' 
-                      : 'text-gray-700'
+                      ? 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400' 
+                      : 'text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   <span className={option.value === 0 ? 'font-normal' : `font-bold text-${option.value === 1 ? 'lg' : option.value === 2 ? 'base' : 'sm'}`}>
@@ -261,13 +271,13 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
           )}
         </div>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1" />
 
         {/* Text Styles */}
         <button
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`p-2 rounded hover:bg-gray-100 transition ${
-            editor.isActive('bold') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+          className={`p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition ${
+            editor.isActive('bold') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
           }`}
           title="Bold"
         >
@@ -276,21 +286,21 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
         
         <button
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`p-2 rounded hover:bg-gray-100 transition ${
-            editor.isActive('italic') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+          className={`p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition ${
+            editor.isActive('italic') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
           }`}
           title="Italic"
         >
           <Italic className="h-4 w-4" />
         </button>
 
-        <div className="w-px h-6 bg-gray-200 mx-1" />
+        <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 mx-1" />
 
         {/* Lists */}
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-gray-100 transition ${
-            editor.isActive('bulletList') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+          className={`p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition ${
+            editor.isActive('bulletList') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
           }`}
           title="Bullet List"
         >
@@ -299,8 +309,8 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
         
         <button
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`p-2 rounded hover:bg-gray-100 transition ${
-            editor.isActive('orderedList') ? 'bg-blue-50 text-blue-600' : 'text-gray-600'
+          className={`p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800 transition ${
+            editor.isActive('orderedList') ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'
           }`}
           title="Numbered List"
         >
@@ -309,22 +319,23 @@ const NoteEditor = ({ note, onBack, onUpdate, onDelete, expanded, onToggleExpand
       </div>
 
       {/* Editor Content */}
-      <div className="flex-1 overflow-y-auto bg-white" onClick={() => editor.chain().focus().run()}>
+      <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900" onClick={() => editor.chain().focus().run()}>
         <EditorContent editor={editor} />
       </div>
     </>
   );
 
   if (expanded) {
-    return (
-      <div className="fixed inset-0 bg-white z-50 flex flex-col">
+     return createPortal(
+      <div className="fixed inset-0 bg-white dark:bg-slate-900 z-[100] flex flex-col animate-in fade-in zoom-in-95 duration-200">
         {content}
-      </div>
+      </div>,
+      document.body
     );
   }
 
   return (
-    <div className="h-full flex flex-col border rounded-lg bg-white">
+    <div className="h-full flex flex-col border rounded-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
       {content}
     </div>
   );
