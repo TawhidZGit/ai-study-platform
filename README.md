@@ -4,7 +4,7 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 
 ## 📸 Workspace Preview
 
-[Insert screenshots of workspace]
+[Screenshots of Workspace will be added soon]
 
 ## 🛠️ Tech Stack
  
