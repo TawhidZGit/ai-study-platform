@@ -8,29 +8,115 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 
 ## 🛠️ Tech Stack
  
-### Frontend:
-- **Framework:** React (Vite)
-- **Styling:** Tailwind CSS
-- **State Management**: React Context API (Auth & Theme)
-- **Editor:** TipTap (Headless WYSIWYG)
-- **Layout:** React Resizable Panels
-- **Icons:** Lucide React
-- **HTTP Client:** Axios
+ ![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-000000?logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?logo=jsonwebtokens&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Gemini_Pro-4285F4?logo=google&logoColor=white)
 
-### Backend:
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** PostgreSQL (via Supabase)
-- JWT Authentication
-- **AI Integration**: Google Generative AI (Gemini Pro)
-- **File Handling:** Multer
-- **Parsing:** pdf-parse
 
-### Security
-- **Authentication:** JWT (JSON Web Tokens)
-- **Password Encryption:** Bcryptjs
-- **Middleware:** Custom auth and upload validation
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge\&logo=react\&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge\&logo=vite\&logoColor=FFD62E)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-0F172A?style=for-the-badge\&logo=tailwind-css\&logoColor=38BDF8)
+![Context API](https://img.shields.io/badge/Context_API-React-blue?style=for-the-badge)
+![TipTap](https://img.shields.io/badge/TipTap-000000?style=for-the-badge)
+![Resizable Panels](https://img.shields.io/badge/Resizable_Panels-React-lightgrey?style=for-the-badge)
+![Lucide](https://img.shields.io/badge/Lucide_Icons-000000?style=for-the-badge)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge\&logo=axios\&logoColor=white)
 
+
+![Node.js](https://img.shields.io/badge/Node.js-0F172A?style=for-the-badge\&logo=node.js\&logoColor=22C55E)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge\&logo=express)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-0F172A?style=for-the-badge\&logo=postgresql\&logoColor=38BDF8)
+![Supabase](https://img.shields.io/badge/Supabase-0F172A?style=for-the-badge\&logo=supabase\&logoColor=3ECF8E)
+![JWT](https://img.shields.io/badge/JWT-Authentication-black?style=for-the-badge\&logo=jsonwebtokens)
+![Google Gemini](https://img.shields.io/badge/Gemini_Pro-Google_AI-4285F4?style=for-the-badge\&logo=google)
+![Multer](https://img.shields.io/badge/Multer-File_Uploads-orange?style=for-the-badge)
+![PDF Parse](https://img.shields.io/badge/pdf--parse-Parsing-lightgrey?style=for-the-badge)
+
+
+![JWT](https://img.shields.io/badge/JWT-Security-black?style=for-the-badge\&logo=jsonwebtokens)
+![Bcrypt](https://img.shields.io/badge/Bcryptjs-Password_Hashing-red?style=for-the-badge)
+![Middleware](https://img.shields.io/badge/Middleware-Custom-blue?style=for-the-badge)
+
+
+![React](https://img.shields.io/badge/React-20232A?style=flat\&logo=react\&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat\&logo=vite\&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat\&logo=tailwind-css\&logoColor=white)
+![Context API](https://img.shields.io/badge/Context_API-61DAFB?style=flat\&logo=react\&logoColor=black)
+![TipTap](https://img.shields.io/badge/TipTap-000000?style=flat\&logo=editorconfig\&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat\&logo=axios\&logoColor=white)
+![Lucide](https://img.shields.io/badge/Lucide_Icons-000000?style=flat\&logo=lucide\&logoColor=white)
+
+
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat\&logo=node-dot-js\&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=flat\&logo=express\&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat\&logo=postgresql\&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=flat\&logo=supabase\&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat\&logo=jsonwebtokens\&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Gemini_AI-4285F4?style=flat\&logo=google\&logoColor=white)
+![Multer](https://img.shields.io/badge/Multer-FF6F00?style=flat)
+![PDF](https://img.shields.io/badge/pdf--parse-CC0000?style=flat\&logo=adobeacrobatreader\&logoColor=white)
+
+
+![JWT](https://img.shields.io/badge/JWT_Auth-000000?style=flat\&logo=jsonwebtokens\&logoColor=white)
+![Bcrypt](https://img.shields.io/badge/Bcryptjs-003A8F?style=flat)
+![Middleware](https://img.shields.io/badge/Custom_Middleware-555555?style=flat)
+
+
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge\&logo=react\&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge\&logo=vite\&logoColor=FFD62E)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-0F172A?style=for-the-badge\&logo=tailwind-css\&logoColor=38BDF8)
+![TipTap](https://img.shields.io/badge/TipTap-000000?style=for-the-badge)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge\&logo=axios\&logoColor=white)
+![Lucide](https://img.shields.io/badge/Lucide_Icons-000000?style=for-the-badge)
+
+* **Framework:** React (Vite)
+* **Styling:** Tailwind CSS
+* **State Management:** React Context API (Auth & Theme)
+* **Editor:** TipTap (Headless WYSIWYG)
+* **Layout:** React Resizable Panels
+* **Icons:** Lucide React
+* **HTTP Client:** Axios
+
+
+### Backend
+
+![Node.js](https://img.shields.io/badge/Node.js-0F172A?style=for-the-badge\&logo=node.js\&logoColor=22C55E)
+![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge\&logo=express)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-0F172A?style=for-the-badge\&logo=postgresql\&logoColor=38BDF8)
+![Supabase](https://img.shields.io/badge/Supabase-0F172A?style=for-the-badge\&logo=supabase\&logoColor=3ECF8E)
+![JWT](https://img.shields.io/badge/JWT-Auth-black?style=for-the-badge\&logo=jsonwebtokens)
+![Google\_Gemini](https://img.shields.io/badge/Gemini_Pro-4285F4?style=for-the-badge\&logo=google)
+![Multer](https://img.shields.io/badge/Multer-File_Uploads-orange?style=for-the-badge)
+![pdf--parse](https://img.shields.io/badge/pdf--parse-Parsing-lightgrey?style=for-the-badge)
+
+* **Runtime:** Node.js
+* **Framework:** Express.js
+* **Database:** PostgreSQL (via Supabase)
+* **Authentication:** JWT
+* **AI Integration:** Google Generative AI (Gemini Pro)
+* **File Handling:** Multer
+* **Parsing:** pdf-parse
+
+
+### 🔐 Security
+
+![JWT](https://img.shields.io/badge/JWT-Security-black?style=for-the-badge\&logo=jsonwebtokens)
+![Bcryptjs](https://img.shields.io/badge/Bcryptjs-Password_Hashing-red?style=for-the-badge)
+
+* **Authentication:** JWT (JSON Web Tokens)
+* **Password Encryption:** Bcryptjs
+* **Middleware:** Custom authentication & upload validation
 
 
 ## ✨ Features
