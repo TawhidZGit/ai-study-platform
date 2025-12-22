@@ -4,7 +4,23 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 
 ## 📸 Workspace Preview
 
-[Screenshots of Workspace will be added soon]
+### Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+### Project Layout
+![Project](screenshots/project.png)
+
+### Note Editor
+![Notes](screenshots/notes.png)
+
+### Summary Generation
+![Summary](screenshots/summary.png)
+
+### Quiz Generatioin
+![Quiz](screenshots/quizzes.png)
+
+### Flashcards Generation
+![Flashcards](screenshots/flashcards.png)
 
 ## 🛠️ Tech Stack
  
