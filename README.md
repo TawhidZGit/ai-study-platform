@@ -4,11 +4,11 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 
 ## 📸 Workspace Preview
 
-### Dashboard
+### Project Dashboard
 ![Dashboard](screenshots/dashboard.png)
 ---
-### Project Layout
-![Project](screenshots/project.png)
+### Workspace Layout
+![Workspace](screenshots/workspace.png)
 ---
 ### Note Editor
 ![Notes](screenshots/notes.png)
@@ -16,7 +16,7 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 ### Summary Generation
 ![Summary](screenshots/summary.png)
 ---
-### Quiz Generatioin
+### Quiz Generation
 ![Quiz](screenshots/quizzes.png)
 ---
 ### Flashcards Generation
