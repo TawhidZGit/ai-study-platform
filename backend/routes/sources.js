@@ -1,10 +1,8 @@
 const express = require('express');
 const pool = require('../config/db');
-const upload = require('../config/upload');
+const upload = require('../config/upload'); // Now using memoryStorage!
 const authenticateToken = require('../middleware/auth');
-const fs = require('fs').promises;
 const pdfParse = require('pdf-parse');
-const { deleteUploadedFile } = require('../utils/fileCleanup');
 
 const router = express.Router();
 router.use(authenticateToken);
@@ -70,43 +68,36 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Upload source
+// Upload source (UPDATED FOR MEMORY STORAGE)
 router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'), async (req, res) => {
-  let uploadedFilePath = null;
-  
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const { originalname, path: filepath } = req.file;
-    uploadedFilePath = filepath;
+    // Notice we extract 'buffer' instead of 'path'
+    const { originalname, buffer } = req.file; 
     
     let content = '';
     let fileType = 'txt';
 
-    // Extract text based on file type
-    if (originalname.endsWith('.pdf')) {
+    // Extract text directly from the RAM buffer! No fs.readFile needed.
+    if (originalname.toLowerCase().endsWith('.pdf')) {
       fileType = 'pdf';
-      const dataBuffer = await fs.readFile(filepath);
-      const pdfData = await pdfParse(dataBuffer);
+      const pdfData = await pdfParse(buffer);
       content = pdfData.text;
-    } else if (originalname.endsWith('.txt')) {
+    } else if (originalname.toLowerCase().endsWith('.txt')) {
       fileType = 'txt';
-      content = await fs.readFile(filepath, 'utf-8');
+      content = buffer.toString('utf-8');
     }
 
     if (!content || content.trim().length === 0) {
-      // Clean up the uploaded file
-      if (uploadedFilePath) {
-        await fs.unlink(uploadedFilePath).catch(console.error);
-      }
       return res.status(400).json({ error: 'Could not extract text from file' });
     }
 
     const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
 
-    // Save to database
+    // Save extracted text to database
     const result = await pool.query(
       `INSERT INTO sources (project_id, filename, file_type, content, word_count) 
        VALUES ($1, $2, $3, $4, $5) 
@@ -122,22 +113,16 @@ router.post('/upload/:projectId', verifyProjectOwnership, upload.single('file'),
 
     res.json({ source: result.rows[0] });
   } catch (error) {
-    // Clean up uploaded file on error
-    if (uploadedFilePath) {
-      await fs.unlink(uploadedFilePath).catch(console.error);
-    }
-    
     console.error('Upload source error:', error);
     res.status(500).json({ error: 'Failed to upload source' });
   }
 });
 
-// Delete source
+// Delete source (UPDATED to remove local file deletion logic)
 router.delete('/:id', async (req, res) => {
   try {
-    // Get the source info before deleting
     const sourceResult = await pool.query(
-      `SELECT s.filename, s.project_id, p.user_id 
+      `SELECT s.project_id, p.user_id 
        FROM sources s
        JOIN projects p ON s.project_id = p.id
        WHERE s.id = $1`,
@@ -148,17 +133,12 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Source not found' });
     }
 
-    const source = sourceResult.rows[0];
-
-    if (source.user_id !== req.user.id) {
+    if (sourceResult.rows[0].user_id !== req.user.id) {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Delete from database
+    // Delete from database only (no local files to delete anymore!)
     await pool.query('DELETE FROM sources WHERE id = $1', [req.params.id]);
-
-    // Try to delete the physical file
-    await deleteUploadedFile(source.filename);
 
     res.json({ message: 'Source deleted successfully' });
   } catch (error) {
