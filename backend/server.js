@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pool = require('./config/db');
-const { cleanupOrphanedFiles } = require('./utils/fileCleanup');
 
 const app = express();
 
@@ -29,11 +28,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   
-  // Run cleanup on startup (optional - removes orphaned files)
-  try {
-    console.log('Running orphaned file cleanup...');
-    await cleanupOrphanedFiles(pool);
-  } catch (error) {
-    console.error('Cleanup failed:', error.message);
-  }
+  // NOTE: Local file cleanup was removed because we now use memory storage!
+  // Files are processed in RAM and automatically garbage collected by Node.js.
 });
