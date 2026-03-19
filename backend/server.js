@@ -6,7 +6,14 @@ const pool = require('./config/db');
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://ai-study-platform-eta.vercel.app', // Vercel URL here
+    'http://localhost:5173',                  // local Vite frontend
+    'http://localhost:5000'                   // (Optional) Allows local testing tools
+  ],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
