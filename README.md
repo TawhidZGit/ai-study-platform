@@ -2,6 +2,8 @@
 
 An AI-powered study platform that utilizes a project-based learning workspace, leveraging Google's Gemini AI to transform static documents into interactive study tools. Designed to streamline the educational workflow by unifying source management, note-taking, and AI tutoring into a single, adaptive interface.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-View_Project-success?style=for-the-badge&logo=vercel)](https://ai-study-platform-eta.vercel.app/)
+
 ## 📸 Workspace Preview
 
 ### Project Dashboard
