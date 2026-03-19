@@ -11,7 +11,9 @@ app.use(cors({
   origin: [
     'https://ai-study-platform-eta.vercel.app', // Vercel URL here
     'http://localhost:5173',                  // local Vite frontend
-    'http://localhost:5000'                   // (Optional) Allows local testing tools
+    'http://127.0.0.1:5173',
+    'http://localhost:5000',                   // (Optional) Allows local testing tools
+    'http://localhost:5001'
   ],
   credentials: true
 }));
