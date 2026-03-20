@@ -63,6 +63,10 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 * **File Handling:** Multer
 * **Parsing:** pdf-parse
 
+### ☁️ Infrastructure & Hosting
+* **Frontend Hosting:** Vercel (Automated CI/CD via GitHub)
+* **Backend API:** Render (Web Service)
+* **Database:** Supabase (Cloud PostgreSQL)
 
 ### 🔐 Security
 
