@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../utils/api';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Folder } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
 import SourcesPanel from '../components/workspace/SourcesPanel';
@@ -70,19 +70,22 @@ const Workspace = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-[#09090B]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
 
   if (error || !project) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center">
-          <p className="text-rose-600 mb-4 text-lg">{error || 'Project not found'}</p>
-          <button onClick={() => navigate('/projects')} className="text-indigo-600 hover:underline font-medium">
-            Back to Projects
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-[#09090B] font-sans">
+        <div className="text-center bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/60 dark:border-white/10 p-10 rounded-3xl shadow-xl max-w-sm">
+          <p className="text-rose-600 dark:text-rose-400 mb-6 font-medium">{error || 'Space not found'}</p>
+          <button 
+            onClick={() => navigate('/projects')} 
+            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-sm font-semibold hover:scale-105 active:scale-95 transition-all shadow-md"
+          >
+            Back to Spaces
           </button>
         </div>
       </div>
@@ -90,48 +93,54 @@ const Workspace = () => {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 selection:bg-indigo-100 selection:text-indigo-700 transition-colors duration-300">
+    <div className="h-screen flex flex-col bg-[#FAFAFA] dark:bg-[#09090B] text-slate-800 dark:text-slate-200 font-sans relative overflow-hidden transition-colors duration-300">
       
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm px-4 py-3 flex-shrink-0 z-20 supports-[backdrop-filter]:bg-white/60">
+      {/* Ambient Painted Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/20 dark:bg-indigo-600/20 blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-5%] right-[-5%] w-[45%] h-[45%] rounded-full bg-purple-400/20 dark:bg-purple-800/20 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[5%] w-[40%] h-[40%] rounded-full bg-sky-300/30 dark:bg-sky-900/20 blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[35%] h-[35%] rounded-full bg-rose-200/20 dark:bg-rose-900/20 blur-[140px] pointer-events-none" />
+
+      {/* Header - True Frosted Glass */}
+      <header className="relative z-40 bg-white/40 dark:bg-[#1A1A1A]/60 backdrop-blur-2xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_30px_rgb(0,0,0,0.05)] px-4 py-3 flex-shrink-0 transition-all">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button 
               onClick={() => navigate('/projects')} 
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition text-slate-500 dark:text-slate-400 hover:text-slate-700"
-              title="Back to Projects"
+              className="p-2 hover:bg-white/80 dark:hover:bg-white/10 rounded-full transition-all text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 group"
+              title="Back to Spaces"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
             </button>
-            <div className="flex items-center gap-3">
-              {/* Colored Dot */}
-              <div 
-                className="w-3 h-3 rounded-full ring-2 ring-offset-1 ring-slate-100 dark:ring-slate-800" 
-                style={{ backgroundColor: project.color || '#4F46E5' }} 
+            <div className="h-5 w-px bg-slate-300 dark:bg-slate-700 mx-1"></div>
+            <div className="flex items-center gap-3 pl-1">
+              {/* Clean folder icon mapped to project color */}
+              <Folder 
+                className="h-5 w-5 drop-shadow-sm" 
+                style={{ color: project.color || '#3730a3', fill: `${project.color}20` || '#3730a320' }} 
               />
               <div>
-                <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                <h1 className="text-base font-bold text-slate-800 dark:text-slate-100 leading-tight">
                   {project.name}
                 </h1>
-                {project.description && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-md font-medium">
-                    {project.description}
-                  </p>
-                )}
               </div>
             </div>
           </div>
 
           {/* User info */}
           <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:block">
+              {user?.name}
+            </span>
+            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block"></div>
             <ThemeToggle />
-            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{user?.name}</span>
           </div>
         </div>
       </header>
 
-      {/* Workspace Area */}
-      <div className="flex-1 overflow-hidden flex">
+      {/* Workspace Area - Panels are slightly translucent to show the canvas glow */}
+      <div className="flex-1 overflow-hidden flex relative z-10">
+        
         {/* Left Dock (when sources collapsed) */}
         {sourcesCollapsed && (
           <SourcesDock 
@@ -150,26 +159,28 @@ const Workspace = () => {
             {/* === LEFT PANEL (SOURCES) === */}
             {!sourcesCollapsed && (
               <>
-                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800">
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border-r border-slate-200/50 dark:border-white/5">
                   <div className="h-full flex flex-col">
+                    {/* Note: We will need to update SourcesPanel styling later if needed! */}
                     <SourcesPanel projectId={id} onSourcesUpdate={fetchSources} />
                   </div>
                 </Panel>
                 
                 {/* Left Resize Handle */}
                 <PanelResizeHandle 
-                  className="w-2 bg-transparent hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors cursor-col-resize flex items-center justify-center z-10 group"
+                  className="w-1.5 bg-transparent hover:bg-indigo-500/20 dark:hover:bg-indigo-500/30 transition-colors cursor-col-resize flex items-center justify-center z-20 group"
                   onDoubleClick={() => setSourcesCollapsed(true)}
                   title="Double-click to collapse sources"
                 >
-                  <div className="w-0.5 h-8 bg-slate-300 dark:bg-slate-700 rounded-full group-hover:bg-indigo-400 transition-colors" />
+                  <div className="w-0.5 h-8 bg-slate-300/50 dark:bg-slate-600/50 rounded-full group-hover:bg-indigo-400 transition-colors" />
                 </PanelResizeHandle>
               </>
             )}
 
             {/* === MIDDLE PANEL (CHAT) === */}
-            <Panel order={2} minSize={30} className="bg-white dark:bg-slate-900 flex flex-col relative z-0">
+            <Panel order={2} minSize={30} className="bg-transparent flex flex-col relative z-0">
               <div className="flex-1 overflow-hidden">
+                {/* Note: We will need to update ChatPanel styling later if needed! */}
                 <ChatPanel projectId={id} />
               </div>
             </Panel>
@@ -179,15 +190,16 @@ const Workspace = () => {
               <>
                 {/* Right Resize Handle */}
                 <PanelResizeHandle 
-                  className="w-2 bg-transparent hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors cursor-col-resize flex items-center justify-center z-10 group"
+                  className="w-1.5 bg-transparent hover:bg-indigo-500/20 dark:hover:bg-indigo-500/30 transition-colors cursor-col-resize flex items-center justify-center z-20 group"
                   onDoubleClick={() => setNotesCollapsed(true)}
                   title="Double-click to collapse notes"
                 >
-                  <div className="w-0.5 h-8 bg-slate-300 dark:bg-slate-700 rounded-full group-hover:bg-indigo-400 transition-colors" />
+                  <div className="w-0.5 h-8 bg-slate-300/50 dark:bg-slate-600/50 rounded-full group-hover:bg-indigo-400 transition-colors" />
                 </PanelResizeHandle>
 
-                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800">
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border-l border-slate-200/50 dark:border-white/5">
                   <div className="h-full flex flex-col">
+                    {/* Note: We will need to update NotesToolsPanel styling later if needed! */}
                     <NotesToolsPanel 
                       projectId={id} 
                       onNotesUpdate={fetchNotes}
