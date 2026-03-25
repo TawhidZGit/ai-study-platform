@@ -115,9 +115,16 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
   return (
     <>
       <div className="h-full flex flex-col bg-white dark:bg-slate-900 transition-colors">
-        {/* Header */}
+        {/* Header - BRAND STYLING APPLIED HERE */}
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">Sources</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-1.5 rounded-lg shadow-md shadow-indigo-500/20">
+              <FileText className="h-4 w-4" />
+            </div>
+            <h2 className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+              Sources
+            </h2>
+          </div>
           
           {/* Upload Area */}
           <div className="space-y-3">
@@ -232,7 +239,7 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
   );
 };
 
-// Source Viewer Component
+// Source Viewer Component (Unchanged)
 const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
   const [zoom, setZoom] = useState(100);
   const [selectedText, setSelectedText] = useState('');

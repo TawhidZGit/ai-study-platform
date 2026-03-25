@@ -400,7 +400,7 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
       <div className="relative z-20 flex justify-between items-start mb-6">
         <Folder 
           className="h-8 w-8 drop-shadow-sm transition-transform group-hover:scale-105" 
-          style={{ color: project.color || '#3730a3' }} 
+          style={{ color: project.color || '#3b82f6'}} 
         />
 
         <div className="relative" ref={menuRef}>

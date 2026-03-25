@@ -18,7 +18,8 @@ const ChatPanel = ({ projectId }) => {
   const [isModeDropdownOpen, setIsModeDropdownOpen] = useState(false);
   const modeDropdownRef = useRef(null);
 
-  const messagesEndRef = useRef(null);
+  // New ref for the scroll container
+  const scrollContainerRef = useRef(null);
   const inputRef = useRef(null);
   const { user } = useAuth();
 
@@ -69,8 +70,11 @@ const ChatPanel = ({ projectId }) => {
     }
   };
 
+  // The Bulletproof Scroll Fix: Directly manipulate the container's scroll position
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   };
 
   // Helper for date separators
@@ -164,7 +168,7 @@ const ChatPanel = ({ projectId }) => {
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-950 transition-colors">
+    <div className="h-full flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950 transition-colors">
       {/* Header */}
       <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-20 sticky top-0">
         <div className="flex items-center gap-3">
@@ -239,8 +243,8 @@ const ChatPanel = ({ projectId }) => {
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      {/* Messages Area - Added scrollContainerRef here */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-600">
             <div className="text-center">
@@ -283,7 +287,7 @@ const ChatPanel = ({ projectId }) => {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
+            {/* Removed the empty div ref since we are scrolling the container itself now */}
           </>
         )}
       </div>

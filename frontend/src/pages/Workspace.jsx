@@ -138,8 +138,8 @@ const Workspace = () => {
         </div>
       </header>
 
-      {/* Workspace Area - Panels are slightly translucent to show the canvas glow */}
-      <div className="flex-1 overflow-hidden flex relative z-10">
+      {/* Workspace Area - Added min-h-0 to strictly constrain flex height */}
+      <div className="flex-1 min-h-0 overflow-hidden flex relative z-10">
         
         {/* Left Dock (when sources collapsed) */}
         {sourcesCollapsed && (
@@ -152,16 +152,15 @@ const Workspace = () => {
           />
         )}
 
-        {/* Main Panel Area */}
-        <div className="flex-1 overflow-hidden">
+        {/* Main Panel Area - Added h-full and min-h-0 */}
+        <div className="flex-1 min-h-0 h-full overflow-hidden">
           <PanelGroup direction="horizontal" autoSaveId={`workspace-layout-${id}`} className="h-full">
             
             {/* === LEFT PANEL (SOURCES) === */}
             {!sourcesCollapsed && (
               <>
-                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border-r border-slate-200/50 dark:border-white/5">
-                  <div className="h-full flex flex-col">
-                    {/* Note: We will need to update SourcesPanel styling later if needed! */}
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={1} className="bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border-r border-slate-200/50 dark:border-white/5 relative z-0">
+                  <div className="h-full flex flex-col overflow-hidden">
                     <SourcesPanel projectId={id} onSourcesUpdate={fetchSources} />
                   </div>
                 </Panel>
@@ -178,9 +177,9 @@ const Workspace = () => {
             )}
 
             {/* === MIDDLE PANEL (CHAT) === */}
-            <Panel order={2} minSize={30} className="bg-transparent flex flex-col relative z-0">
-              <div className="flex-1 overflow-hidden">
-                {/* Note: We will need to update ChatPanel styling later if needed! */}
+            <Panel order={2} minSize={30} className="bg-transparent relative z-0">
+              {/* FIX: Added h-full, w-full, flex flex-col, and overflow-hidden here */}
+              <div className="h-full w-full overflow-hidden flex flex-col">
                 <ChatPanel projectId={id} />
               </div>
             </Panel>
@@ -197,9 +196,8 @@ const Workspace = () => {
                   <div className="w-0.5 h-8 bg-slate-300/50 dark:bg-slate-600/50 rounded-full group-hover:bg-indigo-400 transition-colors" />
                 </PanelResizeHandle>
 
-                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border-l border-slate-200/50 dark:border-white/5">
-                  <div className="h-full flex flex-col">
-                    {/* Note: We will need to update NotesToolsPanel styling later if needed! */}
+                <Panel defaultSize={25} minSize={20} maxSize={40} order={3} className="bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border-l border-slate-200/50 dark:border-white/5 relative z-0">
+                  <div className="h-full flex flex-col overflow-hidden">
                     <NotesToolsPanel 
                       projectId={id} 
                       onNotesUpdate={fetchNotes}
