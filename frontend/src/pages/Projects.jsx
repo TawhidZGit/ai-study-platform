@@ -4,10 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import ThemeToggle from '../components/ThemeToggle'; 
 import { 
-  WandSparkles, Plus, FolderOpen, FileText, StickyNote, Loader2, 
-  Trash2, Settings, Edit2, ChevronDown, 
-  Calendar, ArrowUpNarrowWide, ArrowDownNarrowWide, Type, Clock,
+  Plus, Loader2, Trash2, Edit2, 
+  Calendar, ArrowUpNarrowWide, ArrowDownNarrowWide, Type,
   Search, LayoutGrid, List as ListIcon, X,
+  Folder, FileText, Layers, MoreVertical, Sparkles, LogOut
 } from 'lucide-react';
 
 const Projects = () => {
@@ -20,7 +20,7 @@ const Projects = () => {
   
   // UI State
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
+  const [viewMode, setViewMode] = useState('grid'); 
   
   // Modals state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,12 +31,11 @@ const Projects = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef(null);
 
-  // Filter Options Definition
   const sortOptions = [
-    { id: 'updated', label: 'Last Updated', icon: Calendar },
-    { id: 'newest', label: 'Newest Created', icon: ArrowDownNarrowWide },
-    { id: 'oldest', label: 'Oldest Created', icon: ArrowUpNarrowWide },
-    { id: 'name', label: 'Name (A-Z)', icon: Type },
+    { id: 'updated', label: 'Recently Updated', icon: Calendar },
+    { id: 'newest', label: 'Newest First', icon: ArrowDownNarrowWide },
+    { id: 'oldest', label: 'Oldest First', icon: ArrowUpNarrowWide },
+    { id: 'name', label: 'Alphabetical', icon: Type },
   ];
 
   const currentSort = sortOptions.find(o => o.id === sortBy);
@@ -45,7 +44,6 @@ const Projects = () => {
     fetchProjects();
   }, []);
 
-  // Close filter dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (filterRef.current && !filterRef.current.contains(event.target)) {
@@ -72,7 +70,6 @@ const Projects = () => {
     navigate('/login');
   };
 
-  // 1. Filter by Search Query
   const filteredProjects = useMemo(() => {
     return projects.filter(p => 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,7 +77,6 @@ const Projects = () => {
     );
   }, [projects, searchQuery]);
 
-  // 2. Sort the Filtered Results
   const sortedProjects = useMemo(() => {
     return [...filteredProjects].sort((a, b) => {
       switch (sortBy) {
@@ -97,7 +93,6 @@ const Projects = () => {
     });
   }, [filteredProjects, sortBy]);
 
-  // Handle Create/Edit Open
   const openCreateModal = () => {
     setProjectToEdit(null);
     setIsModalOpen(true);
@@ -108,7 +103,6 @@ const Projects = () => {
     setIsModalOpen(true);
   };
 
-  // Handle Modal Submit
   const handleProjectSaved = (savedProject, isEdit) => {
     if (isEdit) {
       setProjects(prev => prev.map(p => {
@@ -130,10 +124,9 @@ const Projects = () => {
   };
 
   const handleDeleteProject = async (projectId) => {
-    if (!confirm('Are you sure? This will delete all sources, notes, and chat history.')) {
+    if (!confirm('Permanently delete this workspace? This action cannot be undone.')) {
       return;
     }
-
     try {
       await api.delete(`/projects/${projectId}`);
       setProjects(prev => prev.filter(p => p.id !== projectId));
@@ -145,95 +138,109 @@ const Projects = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-[#09090B]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-100 selection:text-indigo-700 transition-colors duration-300">
+    <div className="min-h-screen bg-[#FAFAFA] dark:bg-[#09090B] text-slate-800 dark:text-slate-200 font-sans relative overflow-hidden transition-colors duration-300">
       
-      {/* Header */}
-      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 supports-[backdrop-filter]:bg-white/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-              <WandSparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-none">SynthLearn</h1>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Workspace</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Theme Toggle */}
-            <ThemeToggle />
+      {/* Ambient Painted Background Glows - Balanced Light Mode */}
+      
+      {/* Top Left - Indigo */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-400/20 dark:bg-indigo-600/20 blur-[120px] pointer-events-none" />
+      
+      {/* Top Right - Purple (Bleeds under the attached header) */}
+      <div className="absolute top-[-5%] right-[-5%] w-[45%] h-[45%] rounded-full bg-purple-400/20 dark:bg-purple-800/20 blur-[120px] pointer-events-none" />
+      
+      {/* Bottom Left - Sky Blue */}
+      <div className="absolute bottom-[-10%] left-[5%] w-[40%] h-[40%] rounded-full bg-sky-300/30 dark:bg-sky-900/20 blur-[140px] pointer-events-none" />
 
-            <div className="hidden sm:flex flex-col items-end mr-2">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{user?.name}</span>
+      {/* Bottom Right - Rose (Toned down and pushed out) */}
+      <div className="absolute bottom-[-15%] right-[-10%] w-[35%] h-[35%] rounded-full bg-rose-200/20 dark:bg-rose-900/20 blur-[140px] pointer-events-none" />
+
+      {/* Attached Top Nav - True Frosted Glass */}
+      <div className="fixed top-0 w-full z-40 bg-white/40 dark:bg-[#1A1A1A]/60 backdrop-blur-2xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_30px_rgb(0,0,0,0.05)] transition-all">
+        <nav className="w-full max-w-7xl mx-auto h-16 px-6 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-1.5 rounded-full shadow-sm">
+              <Sparkles className="h-4 w-4" />
             </div>
+            <span className="font-semibold text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+              SynthLearn
+            </span>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium hidden sm:block text-slate-700 dark:text-slate-300">
+              {user?.name}
+            </span>
+            <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 hidden sm:block"></div>
+            <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 px-4 py-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-rose-600 hover:border-rose-100 transition-all text-sm font-medium shadow-sm"
+              className="text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-white/60 dark:hover:bg-slate-800/50"
+              title="Logout"
             >
-              Logout
+              <LogOut className="h-4 w-4" />
             </button>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Main Content Area - Correct Width (max-w-7xl) */}
+      <div className="max-w-7xl mx-auto px-6 pt-28 pb-20 relative z-10">
+      
+      {/* ... the rest of your header and content stays the same ... */}
         
-        {/* Page Title & Actions */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">My Projects</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">Manage your research, notes, and AI conversations.</p>
+            <h1 className="text-3xl md:text-4xl font-medium tracking-tight mb-2">
+              Your Spaces
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-base">
+              A beautiful environment for your synthesized thoughts.
+            </p>
           </div>
           
           <button
             onClick={openCreateModal}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/20 active:scale-95 transition-all duration-200 font-medium"
+            className="group flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all text-sm font-semibold shadow-lg shadow-slate-900/20 dark:shadow-white/10"
           >
-            <Plus className="h-5 w-5" />
-            <span>Create Project</span>
+            <Plus className="h-4 w-4 group-hover:rotate-90 transition-transform" />
+            New Space
           </button>
         </div>
 
-        {/* Filters Toolbar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
-          {/* Functional Search Bar */}
-          <div className="relative flex-1 w-full sm:max-w-xs ml-2">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        {/* Frosted Command Bar */}
+        <div className="flex flex-col md:flex-row items-center gap-4 mb-10">
+          
+          <div className="relative flex-1 w-full group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input 
               type="text" 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search projects..." 
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-transparent focus:bg-white dark:focus:bg-slate-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:focus:ring-indigo-900/20 rounded-lg text-sm text-slate-900 dark:text-white transition-all outline-none placeholder:text-slate-400"
+              placeholder="Search your spaces..." 
+              className="w-full pl-12 pr-6 py-3.5 bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border border-white/60 dark:border-white/5 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent text-sm transition-all placeholder:text-slate-400"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto pr-2">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide px-2 hidden sm:block">Sort By</span>
-            
-            {/* Aesthetic Filter Dropdown */}
-            <div className="relative flex-1 sm:flex-none" ref={filterRef}>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:flex-none" ref={filterRef}>
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="w-full sm:w-auto flex items-center justify-between gap-3 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all text-sm font-medium text-slate-600 dark:text-slate-300 shadow-sm"
+                className="w-full md:w-auto flex items-center justify-between gap-3 px-6 py-3.5 bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border border-white/60 dark:border-white/5 rounded-full shadow-sm hover:bg-white/80 dark:hover:bg-[#222]/50 transition-all text-sm font-medium text-slate-700 dark:text-slate-200"
               >
-                <div className="flex items-center gap-2">
-                  {currentSort && <currentSort.icon className="h-4 w-4" />}
-                  <span>{currentSort?.label}</span>
-                </div>
-                <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${isFilterOpen ? 'rotate-180' : ''}`} />
+                <currentSort.icon className="h-4 w-4 text-slate-400" />
+                <span>{currentSort?.label}</span>
               </button>
 
               {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-1.5 z-20 animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 top-full mt-3 w-56 bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl shadow-xl py-2 z-20 overflow-hidden">
                   {sortOptions.map((option) => (
                     <button
                       key={option.id}
@@ -241,30 +248,24 @@ const Projects = () => {
                         setSortBy(option.id);
                         setIsFilterOpen(false);
                       }}
-                      className={`w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition ${
-                        sortBy === option.id 
-                          ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300' 
-                          : 'text-slate-700 dark:text-slate-300'
-                      }`}
+                      className="w-full text-left px-5 py-2.5 text-sm flex items-center gap-3 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors"
                     >
-                      <option.icon className={`h-4 w-4 ${sortBy === option.id ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`} />
-                      <span className="flex-1 font-medium">{option.label}</span>
-                      {sortBy === option.id && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400" />}
+                      <option.icon className={`h-4 w-4 ${sortBy === option.id ? 'text-indigo-500' : 'text-slate-400'}`} />
+                      <span className={sortBy === option.id ? 'font-semibold' : 'font-medium text-slate-600 dark:text-slate-300'}>
+                        {option.label}
+                      </span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
             
-            <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-2 hidden sm:block"></div>
-            
-            {/* Functional View Toggle */}
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg hidden sm:flex">
+            <div className="flex bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border border-white/60 dark:border-white/5 rounded-full p-1.5 shadow-sm hidden sm:flex">
               <button 
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded shadow-sm transition-all ${
+                className={`p-2 rounded-full transition-all ${
                   viewMode === 'grid' 
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300' 
+                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' 
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >
@@ -272,9 +273,9 @@ const Projects = () => {
               </button>
               <button 
                 onClick={() => setViewMode('list')}
-                className={`p-1.5 rounded shadow-sm transition-all ${
+                className={`p-2 rounded-full transition-all ${
                   viewMode === 'list' 
-                    ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300' 
+                    ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm' 
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >
@@ -284,41 +285,36 @@ const Projects = () => {
           </div>
         </div>
 
-        {/* Projects Display Logic (Grid vs List) */}
+        {/* Dynamic Display */}
         {sortedProjects.length === 0 ? (
-          <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-dashed border-slate-300 dark:border-slate-700">
+          <div className="text-center py-24 bg-white/30 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm">
             {searchQuery ? (
-               // No results found for search
-               <>
-                <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                   <Search className="h-8 w-8 text-slate-400" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">No matches found</h3>
-                <p className="text-slate-500 dark:text-slate-400">Try adjusting your search terms</p>
-               </>
+               <div className="flex flex-col items-center">
+                <Search className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-4" strokeWidth={1.5} />
+                <h3 className="text-lg font-semibold mb-1">No spaces found</h3>
+                <p className="text-slate-500">We couldn't find anything matching "{searchQuery}"</p>
+               </div>
             ) : (
-               // No projects at all
-               <>
-                <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-                  <FolderOpen className="h-10 w-10 text-indigo-500 dark:text-indigo-400" />
+               <div className="flex flex-col items-center">
+                <div className="h-20 w-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mb-6">
+                  <Folder className="h-10 w-10 text-indigo-400" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No projects yet</h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">
-                  Create your first project to start organizing your notes, PDFs, and AI chats.
+                <h3 className="text-2xl font-semibold mb-2">Your canvas is blank</h3>
+                <p className="text-slate-500 mb-8 max-w-sm">
+                  Create a new space to start organizing your documents and synthesizing your notes.
                 </p>
                 <button
                   onClick={openCreateModal}
-                  className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl hover:bg-indigo-700 transition font-medium shadow-lg shadow-indigo-500/30"
+                  className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all text-sm font-semibold shadow-md"
                 >
-                  <Plus className="h-5 w-5" />
-                  Create First Project
+                  Create your first Space
                 </button>
-               </>
+               </div>
             )}
           </div>
         ) : (
           viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sortedProjects.map((project) => (
                 <ProjectCard
                   key={project.id}
@@ -345,7 +341,6 @@ const Projects = () => {
         )}
       </div>
 
-      {/* Reusable Create/Edit Project Modal */}
       {isModalOpen && (
         <ProjectModal
           project={projectToEdit}
@@ -359,31 +354,18 @@ const Projects = () => {
 
 // HELPER: Format Time
 const formatTimeAgo = (dateString) => {
-    if (!dateString) return 'Never';
+    if (!dateString) return 'Just now';
     const getDiff = (d) => Math.floor((new Date() - d) / 1000);
-
     let dateStr = dateString.replace(' ', 'T');
     if (!dateStr.endsWith('Z') && !dateStr.includes('+')) dateStr += 'Z';
     let date = new Date(dateStr);
     let diff = getDiff(date);
-
-    if (diff < -60) {
-      date = new Date(dateString); 
-      diff = getDiff(date);
-    }
-
+    if (diff < -60) { date = new Date(dateString); diff = getDiff(date); }
     if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
-    
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-};
-
-// HELPER: Pluralize
-const pluralize = (count, noun) => {
-    const num = Number(count) || 0;
-    return `${num} ${noun}${num === 1 ? '' : 's'}`;
 };
 
 // COMPONENT: Grid View Card
@@ -401,29 +383,25 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showMenu]);
 
+  // Generate a soft glowing gradient based on the selected hex color
+  const glowStyle = {
+    background: `radial-gradient(circle at top left, ${project.color}40 0%, transparent 70%)`
+  };
+
   return (
     <div
-      className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 transition-all duration-300 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:-translate-y-1 cursor-pointer flex flex-col h-full"
+      className="group relative bg-white/60 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-3xl p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full overflow-hidden"
       onClick={onOpen}
     >
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex items-center gap-4">
-          <div 
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105"
-            style={{ backgroundColor: project.color || '#4F46E5' }} 
-          >
-            <FolderOpen className="h-6 w-6" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
-              {project.name}
-            </h3>
-            <p className="text-xs font-medium text-slate-400 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {formatTimeAgo(project.updated_at)}
-            </p>
-          </div>
-        </div>
+      {/* Internal Glow Overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen transition-opacity group-hover:opacity-100" style={glowStyle} />
+
+      {/* FIXED: Removed the box wrapper, colored the icon directly */}
+      <div className="relative z-20 flex justify-between items-start mb-6">
+        <Folder 
+          className="h-8 w-8 drop-shadow-sm transition-transform group-hover:scale-105" 
+          style={{ color: project.color || '#3730a3' }} 
+        />
 
         <div className="relative" ref={menuRef}>
           <button
@@ -431,61 +409,56 @@ const ProjectCard = ({ project, onOpen, onEdit, onDelete }) => {
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className={`p-2 rounded-full transition-colors ${
-                showMenu 
-                ? 'bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400' 
-                : 'text-slate-300 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300'
-            }`}
+            className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-700 hover:bg-white/50 dark:hover:bg-white/10 dark:hover:text-slate-200 transition-all"
           >
-            <Settings className="h-5 w-5" />
+            <MoreVertical className="h-4 w-4" />
           </button>
 
           {showMenu && (
             <div
-              className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 py-1 origin-top-right animate-in fade-in zoom-in-95 duration-100"
-              style={{ transform: 'translateX(-10px)' }}
+              className="absolute right-0 top-full mt-2 w-44 bg-white/95 dark:bg-[#222]/90 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-2xl shadow-xl z-50 py-1.5 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-50 dark:border-slate-800 mb-1">
-                Actions
-              </div>
               <button
                 onClick={() => { setShowMenu(false); onEdit(); }}
-                className="w-full px-4 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-2 transition-colors"
+                className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-white/5 flex items-center gap-2 transition-colors"
               >
-                <Edit2 className="h-4 w-4" />
-                Edit Details
+                <Edit2 className="h-3.5 w-3.5" />
+                Edit Space
               </button>
               <button
                 onClick={() => { setShowMenu(false); onDelete(); }}
-                className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2 transition-colors"
+                className="w-full px-4 py-2 text-left text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-500/10 flex items-center gap-2 transition-colors"
               >
-                <Trash2 className="h-4 w-4" />
-                Delete Project
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete Space
               </button>
             </div>
           )}
         </div>
       </div>
 
-      <div className="flex-1 mb-6">
-        {project.description ? (
-          <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">
-            {project.description}
-          </p>
-        ) : (
-          <p className="text-sm text-slate-300 dark:text-slate-600 italic">No description added.</p>
-        )}
+      <div className="relative z-10 flex-1 mb-6">
+        <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2 truncate">
+          {project.name}
+        </h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+          {project.description || "No description provided."}
+        </p>
       </div>
 
-      <div className="flex items-center gap-2 mt-auto pt-4 border-t border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-indigo-100 dark:group-hover:border-indigo-900 transition-colors">
-          <FileText className="h-3.5 w-3.5 text-indigo-500" />
-          <span>{pluralize(project.source_count, 'Source')}</span>
+      {/* Glassy Footer Meta */}
+      <div className="relative z-10 flex items-center gap-4 text-xs font-medium text-slate-500 pt-5 border-t border-slate-200/50 dark:border-white/5">
+        <div className="flex items-center gap-1.5 bg-white/50 dark:bg-white/5 px-2.5 py-1 rounded-full border border-white/50 dark:border-white/5">
+          <Layers className="h-3.5 w-3.5" />
+          <span>{project.source_count || 0}</span>
         </div>
-        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 border border-slate-100 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-800 group-hover:border-indigo-100 dark:group-hover:border-indigo-900 transition-colors">
-          <StickyNote className="h-3.5 w-3.5 text-violet-500" />
-          <span>{pluralize(project.note_count, 'Note')}</span>
+        <div className="flex items-center gap-1.5 bg-white/50 dark:bg-white/5 px-2.5 py-1 rounded-full border border-white/50 dark:border-white/5">
+          <FileText className="h-3.5 w-3.5" />
+          <span>{project.note_count || 0}</span>
+        </div>
+        <div className="ml-auto">
+          {formatTimeAgo(project.updated_at)}
         </div>
       </div>
     </div>
@@ -507,77 +480,89 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }, [showMenu]);
 
+    const glowStyle = {
+      background: `radial-gradient(circle at left center, ${project.color}40 0%, transparent 60%)`
+    };
+
     return (
         <div 
             onClick={onOpen}
-            className="group flex items-center p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm cursor-pointer transition-all"
+            // FIXED: Removed overflow-hidden from this parent wrapper. 
+            // Toggles between an extremely high z-index when open and a normal one when closed.
+            className={`group relative flex items-center px-4 py-3.5 cursor-pointer transition-all ${showMenu ? 'z-[100]' : 'z-10'}`}
         >
-            {/* Icon */}
-            <div 
-                className="w-10 h-10 rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0 mr-4"
-                style={{ backgroundColor: project.color || '#4F46E5' }} 
-            >
-                <FolderOpen className="h-5 w-5" />
+            {/* NEW: Dedicated background layer that cleanly clips the glow but NOT the menu */}
+            <div className="absolute inset-0 bg-white/60 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-2xl group-hover:bg-white/80 dark:group-hover:bg-white/5 group-hover:shadow-md transition-all overflow-hidden -z-10">
+               <div className="absolute inset-0 pointer-events-none opacity-50 dark:opacity-30 mix-blend-multiply dark:mix-blend-screen transition-opacity group-hover:opacity-100" style={glowStyle} />
             </div>
 
-            {/* Title & Desc */}
-            <div className="flex-1 min-w-0 mr-4">
-                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
-                    {project.name}
-                </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                    {project.description || <span className="text-slate-300 dark:text-slate-600 italic">No description</span>}
-                </p>
-            </div>
+            {/* FIXED: Removed the box wrapper, colored the icon directly, kept alignment margins */}
+            <Folder 
+              className="relative z-10 h-6 w-6 flex-shrink-0 mr-4 drop-shadow-sm" 
+              style={{ color: project.color || '#3730a3' }} 
+            />
 
-            {/* Counts */}
-            <div className="hidden sm:flex items-center gap-3 mr-6">
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-20">
-                    <FileText className="h-3.5 w-3.5" />
-                    {pluralize(project.source_count, 'Source')}
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 w-20">
-                    <StickyNote className="h-3.5 w-3.5" />
-                    {pluralize(project.note_count, 'Note')}
+            <div className="relative z-10 flex-1 min-w-0 pr-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                  <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100 truncate">
+                      {project.name}
+                  </h3>
+                  <p className="text-sm text-slate-500 truncate hidden sm:inline-block">
+                      {project.description || "No description"}
+                  </p>
                 </div>
             </div>
 
-            {/* Date */}
-            <div className="hidden md:flex flex-col items-end mr-4 min-w-[80px]">
-                <span className="text-xs text-slate-400 dark:text-slate-500">Updated</span>
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">{formatTimeAgo(project.updated_at)}</span>
+            <div className="relative z-10 hidden md:flex items-center gap-6 pr-6 text-sm text-slate-500">
+                <div className="flex items-center gap-2 w-16 bg-white/40 dark:bg-white/5 px-2.5 py-1 rounded-full border border-white/50 dark:border-white/5">
+                    <Layers className="h-4 w-4" />
+                    <span>{project.source_count || 0}</span>
+                </div>
+                <div className="flex items-center gap-2 w-16 bg-white/40 dark:bg-white/5 px-2.5 py-1 rounded-full border border-white/50 dark:border-white/5">
+                    <FileText className="h-4 w-4" />
+                    <span>{project.note_count || 0}</span>
+                </div>
+                <div className="w-24 text-right text-xs font-medium">
+                  {formatTimeAgo(project.updated_at)}
+                </div>
             </div>
 
-            {/* Settings */}
-            <div className="relative" ref={menuRef}>
+            <div className="relative z-20" ref={menuRef}>
                 <button
                     onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMenu(!showMenu);
+                      e.stopPropagation();
+                      setShowMenu(!showMenu);
                     }}
-                    className="p-2 rounded-full text-slate-300 dark:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    className={`w-8 h-8 flex items-center justify-center rounded-full transition-all ${
+                      showMenu 
+                        ? 'bg-white/80 dark:bg-white/20 text-slate-900 dark:text-white shadow-sm' 
+                        : 'text-slate-400 hover:text-slate-700 hover:bg-white/80 dark:hover:bg-white/10 dark:hover:text-slate-200'
+                    }`}
                 >
-                    <Settings className="h-5 w-5" />
+                    <MoreVertical className="h-4 w-4" />
                 </button>
 
                  {showMenu && (
                     <div
-                    className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 py-1 origin-top-right"
-                    onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 top-full mt-2 w-48 bg-white/95 dark:bg-[#222]/95 backdrop-blur-2xl border border-white/60 dark:border-white/10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] z-[200] py-1.5"
+                      onClick={(e) => e.stopPropagation()}
                     >
                         <button
                             onClick={() => { setShowMenu(false); onEdit(); }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-2"
+                            className="w-full px-4 py-2.5 text-left text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100/80 dark:hover:bg-white/5 flex items-center gap-3 transition-colors"
                         >
-                            <Edit2 className="h-4 w-4" />
-                            Edit Details
+                            <Edit2 className="h-4 w-4 text-slate-400" />
+                            Edit Space
                         </button>
+                        
+                        <div className="h-px w-full bg-slate-200/60 dark:bg-white/5 my-1" />
+
                         <button
                             onClick={() => { setShowMenu(false); onDelete(); }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2"
+                            className="w-full px-4 py-2.5 text-left text-sm font-medium text-rose-600 dark:text-rose-400 hover:bg-rose-50/80 dark:hover:bg-rose-500/10 flex items-center gap-3 transition-colors"
                         >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Project
+                            <Trash2 className="h-4 w-4 text-rose-500 dark:text-rose-400" />
+                            Delete Space
                         </button>
                     </div>
                 )}
@@ -586,25 +571,31 @@ const ProjectRow = ({ project, onOpen, onEdit, onDelete }) => {
     );
 };
 
-// COMPONENT: Project Modal
+// COMPONENT: Project Modal (Glassy)
 const ProjectModal = ({ project, onClose, onSaved }) => {
   const isEditMode = !!project;
   
   const [name, setName] = useState(project?.name || '');
   const [description, setDescription] = useState(project?.description || '');
-  const [color, setColor] = useState(project?.color || '#4F46E5');
+  const [color, setColor] = useState(project?.color || '#3b82f6');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const colors = [
-    '#4F46E5', '#8B5CF6', '#EC4899', '#F43F5E', 
-    '#F59E0B', '#10B981', '#0EA5E9', '#64748B'
+ const colors = [
+    '#6366f1', // Vibrant Indigo
+    '#a855f7', // Vibrant Purple
+    '#e11d48', // Vibrant Rose
+    '#ea580c', // Vibrant Orange
+    '#10b981', // Vibrant Emerald
+    '#0ea5e9', // Vibrant Sky Blue
+    '#3b82f6', // Vibrant Blue
+    '#64748b'  // Vibrant Slate
   ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) { setError('Project name is required'); return; }
+    if (!name.trim()) { setError('Space name is required'); return; }
     setLoading(true);
 
     try {
@@ -618,7 +609,7 @@ const ProjectModal = ({ project, onClose, onSaved }) => {
       onSaved(response.data.project, isEditMode);
     } catch (error) {
       console.error('Project save error:', error);
-      setError(error.response?.data?.error || 'Failed to save project');
+      setError(error.response?.data?.error || 'Failed to save space');
     } finally {
       setLoading(false);
     }
@@ -626,61 +617,61 @@ const ProjectModal = ({ project, onClose, onSaved }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-md flex items-center justify-center z-[100] p-4"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200 border border-slate-100 dark:border-slate-800"
+        className="bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/60 dark:border-white/10 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {isEditMode ? 'Edit Project' : 'Create Project'}
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Configure your workspace details.</p>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-             <X className="h-5 w-5" />
+        <div className="flex justify-between items-center p-6 border-b border-slate-200/50 dark:border-white/5">
+          <h2 className="text-xl font-semibold">
+            {isEditMode ? 'Edit Space' : 'Create New Space'}
+          </h2>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 text-slate-500 hover:bg-slate-200 dark:hover:bg-white/20 transition-colors"
+          >
+             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Project Name</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Space Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Biology 101"
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 dark:text-white font-medium placeholder:text-slate-400"
+              placeholder="e.g. Cognitive Psychology"
+              className="w-full px-4 py-3 bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent text-sm transition-all placeholder:text-slate-400"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Description</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description <span className="text-slate-400 font-normal">(Optional)</span></label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What are you studying?"
+              placeholder="What will you learn here?"
               rows={3}
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition outline-none text-slate-900 dark:text-white resize-none placeholder:text-slate-400"
+              className="w-full px-4 py-3 bg-white/50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent text-sm resize-none transition-all placeholder:text-slate-400"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Theme Color</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Theme Color</label>
             <div className="flex gap-3 flex-wrap">
               {colors.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setColor(c)}
-                  className={`w-9 h-9 rounded-full transition-all duration-200 shadow-sm ${
+                  className={`w-8 h-8 rounded-full transition-all shadow-sm ${
                     color === c 
-                      ? 'ring-2 ring-offset-2 ring-indigo-500 scale-110' 
-                      : 'hover:scale-110 hover:shadow-md'
+                      ? 'ring-2 ring-offset-2 dark:ring-offset-[#1A1A1A] ring-indigo-500 scale-110' 
+                      : 'hover:scale-110 border border-black/5 dark:border-white/10'
                   }`}
                   style={{ backgroundColor: c }}
                   title={c}
@@ -690,26 +681,26 @@ const ProjectModal = ({ project, onClose, onSaved }) => {
           </div>
 
           {error && (
-            <div className="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-3 rounded-xl text-sm font-medium flex items-center gap-2">
-              <div className="w-1.5 h-1.5 bg-rose-600 dark:bg-rose-400 rounded-full" />
+            <div className="bg-rose-50/80 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 p-3.5 rounded-2xl text-sm font-medium">
               {error}
             </div>
           )}
 
-          <div className="flex gap-3 pt-4">
+          <div className="flex justify-end gap-3 pt-2 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition"
+              className="px-5 py-2.5 rounded-full text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-indigo-600 text-white px-4 py-3 font-semibold rounded-xl hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
+              className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-6 py-2.5 rounded-full text-sm font-semibold hover:scale-105 active:scale-95 transition-all shadow-md disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
             >
-              {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Project')}
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isEditMode ? 'Save Changes' : 'Create Space'}
             </button>
           </div>
         </form>
