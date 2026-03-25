@@ -47,13 +47,20 @@ const Login = () => {
       <div className="relative z-10 bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 w-full max-w-md border border-white/60 dark:border-white/10 overflow-hidden">
         
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-500/30 mb-4">
-            <Sparkles className="h-6 w-6" />
+          {/* Brand Lockup */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-2 rounded-xl shadow-lg shadow-indigo-500/30">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+              SynthLearn
+            </span>
           </div>
-          <h2 className="text-3xl font-bold text-center tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+          
+          <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 tracking-tight">
             Welcome back
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Log in to continue to SynthLearn</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">Log in to continue to your workspace</p>
         </div>
         
         <form onSubmit={handleSubmit} className="space-y-5">
