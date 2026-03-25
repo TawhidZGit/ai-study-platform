@@ -99,7 +99,6 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
     }
   };
 
-  // Inline viewer in panel
   if (viewingSource && !expandedView) {
     return (
       <SourceViewer
@@ -114,8 +113,8 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
 
   return (
     <>
-      <div className="h-full flex flex-col bg-white dark:bg-slate-900 transition-colors">
-        {/* Header - BRAND STYLING APPLIED HERE */}
+      {/* Added min-h-0 here to lock flex bounds */}
+      <div className="h-full flex flex-col min-h-0 bg-white dark:bg-slate-900 transition-colors">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
           <div className="flex items-center gap-3 mb-4">
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-1.5 rounded-lg shadow-md shadow-indigo-500/20">
@@ -126,7 +125,6 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
             </h2>
           </div>
           
-          {/* Upload Area */}
           <div className="space-y-3">
             <label className="block group">
               <input
@@ -165,7 +163,6 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
           </div>
         </div>
 
-        {/* Sources List */}
         <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-950">
           {loading ? (
             <div className="flex items-center justify-center py-8">
@@ -222,7 +219,6 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
         </div>
       </div>
 
-      {/* Expanded Viewer Modal */}
       {viewingSource && expandedView && (
         <SourceViewer
           source={viewingSource}
@@ -239,7 +235,6 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
   );
 };
 
-// Source Viewer Component (Unchanged)
 const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
   const [zoom, setZoom] = useState(100);
   const [selectedText, setSelectedText] = useState('');
@@ -264,7 +259,6 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
 
   const content = (
     <>
-      {/* Header */}
       <div className="p-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0 bg-white/90 dark:bg-slate-900/90 backdrop-blur z-10">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
@@ -277,7 +271,6 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Zoom Controls */}
           <div className="hidden sm:flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
             <button
               onClick={() => setZoom(Math.max(50, zoom - 10))}
@@ -314,7 +307,6 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto bg-slate-100/50 dark:bg-slate-950 p-4 sm:p-8">
         <div
           className="max-w-4xl mx-auto p-8 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 min-h-[500px]"
@@ -330,7 +322,6 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
           </div>
         </div>
 
-        {/* Selected Text Indicator */}
         {selectedText && (
           <div className="fixed bottom-6 right-6 bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-900/50 rounded-xl p-4 shadow-lg shadow-amber-500/10 max-w-xs z-50 animate-in slide-in-from-bottom-2">
             <p className="text-xs font-bold text-amber-800 dark:text-amber-400 mb-1 uppercase tracking-wide">Selected Text</p>
@@ -343,14 +334,14 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
 
   if (expanded) {
     return (
-      <div className="fixed inset-0 bg-slate-50 dark:bg-slate-950 z-50 flex flex-col">
+      <div className="fixed inset-0 bg-slate-50 dark:bg-slate-950 z-50 flex flex-col min-h-0">
         {content}
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-0">
       {content}
     </div>
   );
