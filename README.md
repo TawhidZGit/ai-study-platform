@@ -63,6 +63,15 @@ An AI-powered study platform that utilizes a project-based learning workspace, l
 * **File Handling:** Multer
 * **Parsing:** pdf-parse
 
+### ☁️ Infrastructure & Hosting
+
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-0F172A?style=for-the-badge\&logo=supabase\&logoColor=3ECF8E)
+
+* **Frontend Hosting:** Vercel (Automated CI/CD via GitHub)
+* **Backend API:** Render (Web Service)
+* **Database:** Supabase (Cloud PostgreSQL)
 
 ### 🔐 Security
 
