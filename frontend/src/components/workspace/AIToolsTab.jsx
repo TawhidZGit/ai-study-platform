@@ -776,51 +776,63 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
     );
   };
 
+  const contentBody = (
+    <div className="flex-1 overflow-hidden bg-transparent rounded-b-3xl">
+      {isQuiz ? renderQuizContent() : isFlashcards ? renderFlashcardsContent() : renderSummaryContent()}
+    </div>
+  );
+
   // Expanded view using Portal
   if (expanded) {
     return createPortal(
-      <div className="fixed inset-0 bg-slate-50/90 dark:bg-[#09090B]/90 backdrop-blur-2xl z-[100] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-4 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between flex-shrink-0 bg-white/40 dark:bg-[#1A1A1A]/40">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={onBack} 
-              className="w-10 h-10 flex items-center justify-center bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-full hover:bg-white/80 dark:hover:bg-white/10 transition-all text-slate-600 dark:text-slate-300 shadow-sm"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </button>
-            <div>
-              <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{content.title}</h2>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 capitalize mt-0.5 flex items-center gap-2">
-                <span className="bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md border border-white/50 dark:border-white/5">{content.content_type}</span>
-                {new Date(content.created_at).toLocaleDateString()}
-              </p>
+      <div className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200">
+        <div className="w-full h-full max-w-7xl flex flex-col bg-white/80 dark:bg-[#1A1A1A]/80 backdrop-blur-3xl sm:rounded-[2.5rem] border border-white/60 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+          
+          {/* Expanded Header */}
+          <div className="p-4 sm:p-6 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between flex-shrink-0 bg-white/40 dark:bg-[#1A1A1A]/40 backdrop-blur-xl">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={onBack} 
+                className="w-10 h-10 flex items-center justify-center bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-full hover:bg-white/80 dark:hover:bg-white/10 transition-all text-slate-600 dark:text-slate-300 shadow-sm"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{content.title}</h2>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 capitalize mt-0.5 flex items-center gap-2">
+                  <span className="bg-white/50 dark:bg-white/10 px-2 py-0.5 rounded-md border border-white/50 dark:border-white/5">{content.content_type}</span>
+                  {new Date(content.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+               <button 
+                  onClick={() => onExpand(false)} 
+                  className="w-10 h-10 flex items-center justify-center bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-full hover:bg-white/80 dark:hover:bg-white/10 transition-all text-slate-600 dark:text-slate-300 shadow-sm"
+                  title="Minimize"
+                >
+                  <Minimize2 className="h-5 w-5" />
+                </button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => onExpand(false)} 
-              className="w-10 h-10 flex items-center justify-center bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 rounded-full hover:bg-white/80 dark:hover:bg-white/10 transition-all text-slate-600 dark:text-slate-300 shadow-sm"
-              title="Minimize"
-            >
-              <Minimize2 className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-        <div className="flex-1 overflow-hidden bg-transparent">
-          {isQuiz ? renderQuizContent() : isFlashcards ? renderFlashcardsContent() : renderSummaryContent()}
+          
+          {/* Content Body */}
+          {contentBody}
+
         </div>
       </div>,
       document.body
     );
   }
 
-  // Panel view
+  // Panel view (Inline)
   return (
-    <div className="h-full flex flex-col bg-white/30 dark:bg-[#1A1A1A]/30 backdrop-blur-xl border-l border-slate-200/50 dark:border-white/10">
-      <div className="p-4 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between flex-shrink-0 bg-white/40 dark:bg-[#1A1A1A]/40">
+    <div className="h-full flex flex-col bg-transparent relative z-10">
+      <div className="p-4 border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between flex-shrink-0 bg-white/40 dark:bg-[#1A1A1A]/40 backdrop-blur-xl">
         <button 
           onClick={onBack} 
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/50 dark:hover:bg-white/5 transition-all text-slate-600 dark:text-slate-300 font-medium"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/50 dark:hover:bg-white/5 transition-all text-slate-600 dark:text-slate-300 font-medium border border-transparent hover:border-white/60 dark:hover:border-white/10"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="text-sm">Back</span>
@@ -836,7 +848,7 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
         </div>
       </div>
 
-      <div className="px-6 pt-5 pb-3 flex-shrink-0">
+      <div className="px-6 pt-5 pb-3 flex-shrink-0 bg-white/20 dark:bg-white/5 backdrop-blur-sm border-b border-white/40 dark:border-white/5">
         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 truncate">{content.title}</h2>
         <p className="text-xs font-medium text-slate-500 dark:text-slate-400 capitalize mt-1.5 inline-block bg-white/50 dark:bg-white/5 px-2.5 py-1 rounded-md border border-white/50 dark:border-white/5">
           {content.content_type}
@@ -844,7 +856,7 @@ const ContentViewer = ({ content, onBack, onDelete, onExpand, expanded }) => {
       </div>
 
       <div className="flex-1 overflow-hidden">
-        {isQuiz ? renderQuizContent() : isFlashcards ? renderFlashcardsContent() : renderSummaryContent()}
+         {contentBody}
       </div>
     </div>
   );
