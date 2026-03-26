@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom'; // Added this import
 import { Upload, FileText, Trash2, Loader2, Eye, Maximize2, Minimize2, X, ZoomIn, ZoomOut, Download, Plus } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -228,7 +229,7 @@ const SourcesPanel = ({ projectId, onSourcesUpdate }) => {
         </div>
       </div>
 
-      {/* Expanded Viewer Modal */}
+      {/* Expanded Viewer Modal is now handled inside SourceViewer component */}
       {viewingSource && expandedView && (
         <SourceViewer
           source={viewingSource}
@@ -358,14 +359,15 @@ const SourceViewer = ({ source, onClose, onExpand, onDelete, expanded }) => {
     </>
   );
 
-  // Expanded Mode uses a fixed backdrop
+  // Expanded Mode uses createPortal to break out of the panel
   if (expanded) {
-    return (
-      <div className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-md z-50 flex items-center justify-center sm:p-6">
-        <div className="w-full h-full max-w-7xl flex flex-col bg-white/60 dark:bg-[#1A1A1A]/80 backdrop-blur-3xl sm:rounded-[2.5rem] border border-white/60 dark:border-white/10 overflow-hidden shadow-2xl">
+    return createPortal(
+      <div className="fixed inset-0 bg-slate-900/20 dark:bg-black/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200">
+        <div className="w-full h-full max-w-7xl flex flex-col bg-white/60 dark:bg-[#1A1A1A]/80 backdrop-blur-3xl sm:rounded-[2.5rem] border border-white/60 dark:border-white/10 overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
           {content}
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
