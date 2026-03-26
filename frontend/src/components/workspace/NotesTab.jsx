@@ -91,9 +91,10 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
     <div className="h-full flex flex-col bg-transparent">
       {/* Action Bar */}
       <div className="p-4 flex-shrink-0">
+        {/* Changed dark mode background to slate-700 and text to white */}
         <button
           onClick={handleCreateNote}
-          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full hover:scale-105 active:scale-95 transition-all text-sm font-semibold shadow-lg shadow-slate-900/20 dark:shadow-white/10"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 dark:bg-slate-700 text-white rounded-full hover:scale-105 active:scale-95 transition-all text-sm font-semibold shadow-lg shadow-slate-900/20 dark:shadow-slate-900/50"
         >
           <Plus className="h-4 w-4" />
           New Note
