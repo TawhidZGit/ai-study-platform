@@ -60,7 +60,6 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
     await fetchNotes();
   };
 
-  // Helper: Time Ago Formatter
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -72,7 +71,6 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
-  // If a note is selected, show the editor
   if (selectedNote) {
     return (
       <NoteEditor
@@ -89,52 +87,55 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
     );
   }
 
-  // Otherwise show notes list
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-slate-900 transition-colors">
+    <div className="h-full flex flex-col bg-transparent">
       {/* Action Bar */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900">
+      <div className="p-4 flex-shrink-0">
         <button
           onClick={handleCreateNote}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition shadow-md shadow-indigo-500/20 font-medium text-sm"
+          className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full hover:scale-105 active:scale-95 transition-all text-sm font-semibold shadow-lg shadow-slate-900/20 dark:shadow-white/10"
         >
-          <Plus className="h-5 w-5" />
+          <Plus className="h-4 w-4" />
           New Note
         </button>
       </div>
 
       {/* Notes List */}
-      <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-950">
+      <div className="flex-1 overflow-y-auto p-4 pt-0">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
           </div>
         ) : notes.length === 0 ? (
-          <div className="text-center py-12 text-slate-400 dark:text-slate-500">
-            <StickyNote className="h-10 w-10 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
-            <p className="text-sm font-medium">No notes yet</p>
-            <p className="text-xs mt-1">Click "New Note" to start writing</p>
+          <div className="text-center py-12 bg-white/30 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm">
+            <div className="h-16 w-16 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+               <StickyNote className="h-8 w-8 text-amber-400" strokeWidth={1.5} />
+            </div>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">No notes yet</p>
+            <p className="text-xs text-slate-500 mt-1">Click "New Note" to start writing</p>
           </div>
         ) : (
           <div className="space-y-3">
             {notes.map((note) => (
               <div
                 key={note.id}
-                className="group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-sm transition-all cursor-pointer"
+                className="group relative bg-white/60 dark:bg-[#1A1A1A]/60 backdrop-blur-md border border-white/60 dark:border-white/10 rounded-2xl p-4 shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer overflow-hidden"
                 onClick={() => setSelectedNote(note)}
               >
-                <div className="flex items-start justify-between">
+                {/* Soft ambient glow on hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                <div className="relative flex items-start justify-between z-10">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
-                    {/* Icon Badge */}
-                    <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex-shrink-0 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 transition-colors">
-                      <StickyNote className="h-5 w-5 text-amber-500 dark:text-amber-400" />
+                    <div className="p-2.5 bg-white/80 dark:bg-white/10 rounded-xl flex-shrink-0 group-hover:scale-110 transition-transform shadow-sm border border-white/50 dark:border-white/5">
+                      <StickyNote className="h-4 w-4 text-amber-500 dark:text-amber-400" />
                     </div>
                     
                     <div className="flex-1 min-w-0 pt-0.5">
                       <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100 truncate mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {note.title}
                       </h3>
-                      <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                         <Clock className="h-3 w-3" />
                         <span>{formatTimeAgo(note.updated_at)}</span>
                       </div>
@@ -146,7 +147,7 @@ const NotesTab = ({ projectId, onNotesUpdate }) => {
                       e.stopPropagation();
                       handleDeleteNote(note.id);
                     }}
-                    className="p-2 opacity-0 group-hover:opacity-100 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-all"
+                    className="p-2 opacity-0 group-hover:opacity-100 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-full text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-all"
                     title="Delete"
                   >
                     <Trash2 className="h-4 w-4" />
