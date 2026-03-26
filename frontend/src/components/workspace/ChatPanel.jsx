@@ -18,8 +18,7 @@ const ChatPanel = ({ projectId }) => {
   const [isModeDropdownOpen, setIsModeDropdownOpen] = useState(false);
   const modeDropdownRef = useRef(null);
 
-  // New ref for the scroll container
-  const scrollContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const { user } = useAuth();
 
@@ -70,14 +69,10 @@ const ChatPanel = ({ projectId }) => {
     }
   };
 
-  // The Bulletproof Scroll Fix: Directly manipulate the container's scroll position
   const scrollToBottom = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
-  // Helper for date separators
   const formatDateSeparator = (dateString) => {
     if (!dateString) return 'Today';
     const date = new Date(dateString);
@@ -102,7 +97,6 @@ const ChatPanel = ({ projectId }) => {
     setInput('');
     setLoading(true);
 
-    // Optimistically add user message
     const tempId = `temp-${Date.now()}`;
     const tempUserMsg = {
       id: tempId,
@@ -161,43 +155,48 @@ const ChatPanel = ({ projectId }) => {
 
   if (loadingHistory) {
     return (
-      <div className="h-full flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+      <div className="h-full flex items-center justify-center bg-[#FAFAFA] dark:bg-[#09090B]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col min-h-0 bg-slate-50 dark:bg-slate-950 transition-colors">
-      {/* Header */}
-      <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md z-20 sticky top-0">
+    <div className="absolute inset-0 flex flex-col bg-[#FAFAFA] dark:bg-[#09090B] overflow-hidden transition-colors duration-300">
+      
+      {/* Ambient Painted Background Glows */}
+      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-indigo-400/20 dark:bg-indigo-600/10 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/20 dark:bg-purple-800/10 blur-[100px] pointer-events-none" />
+
+      {/* Glassy Header */}
+      <div className="px-6 py-4 flex items-center justify-between flex-shrink-0 bg-white/40 dark:bg-[#1A1A1A]/60 backdrop-blur-2xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_30px_rgb(0,0,0,0.05)] z-20">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-            <MessageCircle className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-2 rounded-xl shadow-sm">
+            <MessageCircle className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">AI Assistant</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Ask questions about your sources</p>
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">AI Assistant</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Synthesize your sources</p>
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          {/* Custom Mode Dropdown */}
+        <div className="flex items-center gap-3">
+          {/* Custom Glassy Mode Dropdown */}
           <div className="relative" ref={modeDropdownRef}>
             <button
               onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-xl transition-all text-xs font-semibold text-slate-600 dark:text-slate-300 min-w-[140px] justify-between shadow-sm"
+              className="flex items-center gap-2 px-4 py-2 bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md border border-white/60 dark:border-white/5 hover:bg-white/80 dark:hover:bg-[#222]/50 rounded-full transition-all text-xs font-semibold text-slate-700 dark:text-slate-200 min-w-[140px] justify-between shadow-sm"
             >
               <div className="flex items-center gap-2">
-                {currentMode && <currentMode.icon className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />}
+                {currentMode && <currentMode.icon className="h-3.5 w-3.5 text-indigo-500" />}
                 <span>{currentMode?.label}</span>
               </div>
               <ChevronDown className={`h-3 w-3 text-slate-400 transition-transform ${isModeDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isModeDropdownOpen && (
-              <div className="absolute right-0 top-full mt-2 w-60 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 py-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="absolute right-0 top-full mt-3 w-60 bg-white/90 dark:bg-[#1A1A1A]/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/60 dark:border-white/10 py-2 z-50 overflow-hidden">
+                <div className="px-5 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   Select AI Mode
                 </div>
                 {MODES.map((m) => (
@@ -207,18 +206,18 @@ const ChatPanel = ({ projectId }) => {
                       setMode(m.id);
                       setIsModeDropdownOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-start gap-3 ${
-                      mode === m.id ? 'bg-indigo-50/60 dark:bg-indigo-900/20' : ''
+                    className={`w-full text-left px-5 py-3 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition flex items-start gap-3 ${
+                      mode === m.id ? 'bg-indigo-50/50 dark:bg-slate-800/40' : ''
                     }`}
                   >
-                    <div className={`mt-0.5 p-1.5 rounded-lg ${
-                      mode === m.id ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                    <div className={`mt-0.5 p-1.5 rounded-xl border border-white/50 dark:border-white/5 ${
+                      mode === m.id ? 'bg-indigo-100 dark:bg-slate-700 text-indigo-600 dark:text-slate-200' : 'bg-white dark:bg-black/20 text-slate-400'
                     }`}>
                       <m.icon className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex-1">
-                      <div className={`text-sm font-medium flex items-center gap-2 ${
-                        mode === m.id ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'
+                      <div className={`text-sm font-semibold flex items-center gap-2 ${
+                        mode === m.id ? 'text-indigo-600 dark:text-slate-200' : 'text-slate-700 dark:text-slate-300'
                       }`}>
                         {m.label}
                         {mode === m.id && <Check className="h-3 w-3" />}
@@ -234,7 +233,7 @@ const ChatPanel = ({ projectId }) => {
           {messages.length > 0 && (
             <button
               onClick={handleClearChat}
-              className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition"
+              className="p-2 text-slate-400 hover:text-rose-500 hover:bg-white/60 dark:hover:bg-rose-500/10 rounded-full transition-all border border-transparent hover:border-white/60 dark:hover:border-white/5"
               title="Clear Chat"
             >
               <Trash2 className="h-4 w-4" />
@@ -243,20 +242,22 @@ const ChatPanel = ({ projectId }) => {
         </div>
       </div>
 
-      {/* Messages Area - Added scrollContainerRef here */}
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto min-h-0 p-6 space-y-6 relative z-10">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-600">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="h-8 w-8 text-indigo-300 dark:text-indigo-700" />
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center bg-white/30 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 rounded-3xl shadow-sm p-10 max-w-sm">
+              <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full shadow-sm flex items-center justify-center mx-auto mb-6">
+                <Sparkles className="h-8 w-8 text-white" />
               </div>
-              <p className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-2">Start a Conversation</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Upload sources and ask questions to begin!</p>
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">Start a Conversation</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                Your AI assistant is ready. Upload sources to the space and ask questions to begin!
+              </p>
             </div>
           </div>
         ) : (
-          <>
+          <div className="max-w-3xl mx-auto space-y-6">
             {messages.map((message, index) => {
               const isNewDay = index === 0 || 
                 new Date(message.created_at).toDateString() !== new Date(messages[index - 1].created_at).toDateString();
@@ -264,8 +265,8 @@ const ChatPanel = ({ projectId }) => {
               return (
                 <div key={message.id}>
                   {isNewDay && (
-                    <div className="flex justify-center my-6">
-                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 uppercase tracking-wide">
+                    <div className="flex justify-center my-8">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 bg-white/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/60 dark:border-white/5 uppercase tracking-wider shadow-sm">
                         {formatDateSeparator(message.created_at)}
                       </span>
                     </div>
@@ -274,46 +275,48 @@ const ChatPanel = ({ projectId }) => {
                 </div>
               );
             })}
+            
             {loading && (
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <div className="flex items-start gap-4 animate-in fade-in duration-300">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm mt-1">
+                  <Sparkles className="h-4 w-4 text-white" />
                 </div>
-                <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm rounded-2xl rounded-tl-none p-4">
-                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Thinking...
+                <div className="bg-white/60 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/60 dark:border-white/10 shadow-sm rounded-3xl rounded-tl-sm p-4 inline-block">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-300 text-sm font-medium">
+                    <Loader2 className="h-4 w-4 animate-spin text-indigo-500" />
+                    Synthesizing...
                   </div>
                 </div>
               </div>
             )}
-            {/* Removed the empty div ref since we are scrolling the container itself now */}
-          </>
+            <div ref={messagesEndRef} className="h-4" />
+          </div>
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex-shrink-0">
-        <div className="flex gap-2 items-end">
+      {/* Glassy Input Area */}
+      <div className="p-4 md:p-6 bg-white/40 dark:bg-[#1A1A1A]/60 backdrop-blur-2xl border-t border-white/60 dark:border-white/10 flex-shrink-0 z-20">
+        <div className="max-w-3xl mx-auto flex gap-3 items-end">
           <textarea
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Type your message to ${currentMode?.label}...`}
+            placeholder={`Ask ${currentMode?.label}...`}
             disabled={loading}
             rows={1}
-            className="flex-1 px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none shadow-inner text-sm transition-all"
-            style={{ minHeight: '44px', maxHeight: '120px' }}
+            className="flex-1 px-5 py-3.5 bg-white/60 dark:bg-black/20 backdrop-blur-md border border-white/60 dark:border-white/10 rounded-3xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-transparent text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 resize-none shadow-[0_2px_10px_rgb(0,0,0,0.02)] text-sm transition-all"
+            style={{ minHeight: '52px', maxHeight: '150px' }}
             onInput={(e) => {
               e.target.style.height = 'auto';
               e.target.style.height = e.target.scrollHeight + 'px';
             }}
           />
+          {/* Universal slate-700 background for Send button */}
           <button
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="p-3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-500 text-white rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40"
+            className="h-[52px] w-[52px] flex items-center justify-center bg-slate-700 text-white rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg shadow-slate-700/20 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed flex-shrink-0"
           >
             <Send className="h-5 w-5" />
           </button>
@@ -328,29 +331,46 @@ const ChatMessage = ({ message, userInitials }) => {
   const isUser = message.role === 'user';
   
   return (
-    <div className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm border ${
-        isUser ? 'bg-indigo-600 dark:bg-indigo-500 border-indigo-600 dark:border-indigo-500' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+    <div className={`flex items-start gap-4 ${isUser ? 'flex-row-reverse' : ''}`}>
+      {/* Universal slate-800 background for User Profile */}
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm mt-1 z-10 ${
+        isUser 
+          ? 'bg-slate-800 text-white' 
+          : 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white'
       }`}>
         {isUser ? (
-          <span className="text-white text-xs font-bold">{userInitials}</span>
+          <span className="text-xs font-bold">{userInitials}</span>
         ) : (
-          <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+          <Sparkles className="h-4 w-4" />
         )}
       </div>
 
-     <div className={`flex-1 max-w-[85%] ${isUser ? 'text-right' : ''}`}>
-        <div className={`inline-block text-left rounded-2xl p-4 shadow-sm text-sm leading-relaxed ${
+      <div className={`flex-1 max-w-[85%] ${isUser ? 'text-right' : ''}`}>
+        <div className={`inline-block text-left p-5 shadow-sm text-sm leading-relaxed ${
           isUser 
-            ? 'bg-indigo-600 dark:bg-indigo-500 text-white rounded-tr-sm' 
-            : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-tl-sm'
+            // Universal slate-800 background for User Message Bubble
+            ? 'bg-slate-800 text-white rounded-3xl rounded-tr-sm shadow-md border border-transparent dark:border-white/5' 
+            : 'bg-white/60 dark:bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/60 dark:border-white/10 rounded-3xl rounded-tl-sm'
         }`}>
           {isUser ? (
-            <p className="whitespace-pre-wrap">
+            <p className="whitespace-pre-wrap font-medium">
               {message.content}
             </p>
           ) : (
-            <div className="prose prose-sm max-w-none prose-slate dark:prose-invert text-slate-700 dark:text-slate-300 dark:[&_*]:!text-slate-300">
+            <div className={`
+              prose prose-sm max-w-none prose-slate dark:prose-invert 
+              text-slate-800 dark:text-slate-200 
+              dark:[&_*]:text-slate-200
+              dark:[&_code]:!bg-slate-800/80 
+              dark:[&_code]:!text-slate-200 
+              dark:[&_code]:!px-1.5 
+              dark:[&_code]:!py-0.5 
+              dark:[&_code]:!rounded-md 
+              [&_code]:font-normal
+              dark:[&_pre]:!bg-[#111]
+              dark:[&_pre]:!border 
+              dark:[&_pre]:!border-white/10
+            `}>
               <MarkdownRenderer content={message.content} />
             </div>
           )}
